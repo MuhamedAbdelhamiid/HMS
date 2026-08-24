@@ -1,0 +1,6 @@
+@HMS.API_HostAddress = http://localhost:5224
+
+GET {{HMS.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
