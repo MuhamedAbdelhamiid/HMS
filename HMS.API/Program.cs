@@ -1,9 +1,11 @@
-using HMS.Infrastructure.Data.Context;
-using Microsoft.EntityFrameworkCore;
-
 using HMS.API.Extensions;
 using HMS.Core.Contracts;
+using HMS.Infrastructure.Data.Context;
 using HMS.Infrastructure.Repository;
+using HMS.Services;
+using HMS.Services.Abstraction;
+using HMS.Services.Profiles.RoomModuleProfiles;
+using Microsoft.EntityFrameworkCore;
 
 namespace HMS.API
 {
@@ -21,10 +23,18 @@ namespace HMS.API
 
             builder.Services.AddDbContext<AppDbContext>(opt =>
             {
-                opt.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+                opt.UseSqlServer(
+                    builder
+                    .Configuration
+                    .GetConnectionString("DefaultConnection"));
             });
 
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+            builder.Services.AddScoped<IRoomService, RoomService>();
+            builder.Services.AddTransient<RoomImageValueResolver>();
+
+            builder.Services.AddAutoMapper(typeof(RoomProfile).Assembly);
+
             #endregion
 
             var app = builder.Build();
@@ -43,9 +53,10 @@ namespace HMS.API
             app.UseHttpsRedirection();
 
             app.UseAuthorization();
+            app.UseStaticFiles();
 
 
-            app.MapControllers(); 
+            app.MapControllers();
             #endregion
 
             app.Run();

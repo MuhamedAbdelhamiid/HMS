@@ -1,11 +1,6 @@
 ﻿using HMS.Core.Contracts;
 using HMS.Core.Entities;
 using HMS.Infrastructure.Data.Context;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace HMS.Infrastructure.Repository
 {
@@ -26,8 +21,8 @@ namespace HMS.Infrastructure.Repository
             var entityType = typeof(TEntity);
 
             if (_repos.ContainsKey(entityType))
-                return (IGenericRepository<TEntity, TKey>) _repos[entityType];
-            
+                return (IGenericRepository<TEntity, TKey>)_repos[entityType];
+
             var newRepo = new GenericRepository<TEntity, TKey>(_dbContext);
             _repos[entityType] = newRepo;
 
