@@ -32,6 +32,7 @@ namespace HMS.API
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
             builder.Services.AddScoped<IRoomService, RoomService>();
             builder.Services.AddTransient<RoomImageValueResolver>();
+            builder.Services.AddTransient<IAttachmentService, AttachmentService>();
 
             builder.Services.AddAutoMapper(typeof(RoomProfile).Assembly);
 
@@ -52,8 +53,8 @@ namespace HMS.API
 
             app.UseHttpsRedirection();
 
-            app.UseAuthorization();
             app.UseStaticFiles();
+            app.UseAuthorization();
 
 
             app.MapControllers();

@@ -5,7 +5,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace HMS.Services.Profiles.RoomModuleProfiles
 {
-    public class RoomImageValueResolver : IValueResolver<Room, RoomDetailsDTO, ICollection<string>>
+    public class RoomImageValueResolver : IValueResolver<Room, RoomDetailsDTO, ICollection<RoomImageDTO>>
     {
         private readonly IConfiguration _configuration;
 
@@ -13,14 +13,14 @@ namespace HMS.Services.Profiles.RoomModuleProfiles
         {
             _configuration = configuration;
         }
-        public ICollection<string> Resolve(
+        public ICollection<RoomImageDTO> Resolve(
             Room source,
             RoomDetailsDTO destination,
-            ICollection<string> destMember,
+           ICollection<RoomImageDTO> destMember,
             ResolutionContext context)
         {
 
-            var returnedImages = new List<string>();
+            var returnedImages = new List<RoomImageDTO>();
             var baseUrl = _configuration.GetSection("Urls")["BaseUrl"];
             foreach (var image in source.Images)
             {
@@ -28,9 +28,17 @@ namespace HMS.Services.Profiles.RoomModuleProfiles
                     continue;
                 else if (image.ImageUrl.ToLower().StartsWith("http")
                     || image.ImageUrl.ToLower().StartsWith("https"))
-                    returnedImages.Add(image.ImageUrl);
+                    returnedImages.Add(new RoomImageDTO()
+                    {
+                        ImageUrl = image.ImageUrl,
+                        Id = image.Id
+                    });
                 else
-                    returnedImages.Add($"{baseUrl}/{image.ImageUrl}");
+                    returnedImages.Add(new RoomImageDTO()
+                    {
+                        ImageUrl = $"{baseUrl}/{image.ImageUrl}",
+                        Id = image.Id
+                    });
             }
 
             return returnedImages;

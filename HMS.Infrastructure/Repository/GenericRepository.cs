@@ -52,8 +52,6 @@ namespace HMS.Infrastructure.Repository
         {
             var query = GetQueryable();
 
-
-
             if (includes is not null)
                 query = query.Include(includes);
 
