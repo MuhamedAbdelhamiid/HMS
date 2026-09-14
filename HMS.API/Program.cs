@@ -1,11 +1,6 @@
 using HMS.API.Extensions;
 using HMS.Core.Contracts;
-using HMS.Infrastructure.Data.Context;
-using HMS.Infrastructure.Repository;
-using HMS.Services;
-using HMS.Services.Abstraction;
-using HMS.Services.Profiles.RoomModuleProfiles;
-using Microsoft.EntityFrameworkCore;
+using HMS.Infrastructure.Data.DataSeed;
 
 namespace HMS.API
 {
@@ -18,30 +13,24 @@ namespace HMS.API
             #region DI Registeration
 
             builder.Services.AddControllers();
-            builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
 
-            builder.Services.AddDbContext<AppDbContext>(opt =>
-            {
-                opt.UseSqlServer(
-                    builder
-                    .Configuration
-                    .GetConnectionString("DefaultConnection"));
-            });
+            builder.Services.AddSwaggerServices();
+            builder.Services.AddApplicationServices();
+            builder.Services.AddInfrastructureServices(builder.Configuration);
+            builder.Services.AddIdentityServices(builder.Configuration);
 
-            builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
-            builder.Services.AddScoped<IRoomService, RoomService>();
-            builder.Services.AddTransient<RoomImageValueResolver>();
-            builder.Services.AddTransient<IAttachmentService, AttachmentService>();
+            builder.Services.AddKeyedScoped<IDataInitializer, IdentityDataInitializer>("Secured");
 
-            builder.Services.AddAutoMapper(typeof(RoomProfile).Assembly);
+
 
             #endregion
 
             var app = builder.Build();
 
-            #region Database Migration
+            #region Database Migration & Seeding
+
             await app.MigrateDatabaseAsync();
+            await app.IdentitySeedAsync();
             #endregion
 
             #region Middleware Configurations
@@ -52,6 +41,7 @@ namespace HMS.API
             }
 
             app.UseHttpsRedirection();
+            app.UseAuthentication();
 
             app.UseStaticFiles();
             app.UseAuthorization();

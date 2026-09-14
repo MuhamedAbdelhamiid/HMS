@@ -2,6 +2,7 @@ using HMS.Services.Abstraction;
 using HMS.Shared.DTOs.RoomModuleDTOs;
 using HMS.Shared.QueryParameters.RoomModule;
 using HMS.Shared.Responses;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HMS.API.Controllers
@@ -21,7 +22,7 @@ namespace HMS.API.Controllers
 
             return HandleResponse(result);
         }
-
+        [Authorize]
         [HttpGet("{id}")]
         public async Task<ActionResult<GenericResponse<RoomDetailsDTO>>> GetById(int id)
         {
@@ -33,6 +34,7 @@ namespace HMS.API.Controllers
         #endregion
 
         #region Admin Endpoints
+        [Authorize(Roles = "Admin,Staff")]
         [HttpGet("admin")]
         public async Task<ActionResult<GenericResponse<IEnumerable<AdminRoomDTO>>>> GetAll([FromQuery] AdminRoomQueryParameters? queryParameters)
         {
@@ -41,7 +43,8 @@ namespace HMS.API.Controllers
             return HandleResponse(result);
         }
 
-        [HttpPost()]
+        [Authorize(Roles = "Admin")]
+        [HttpPost]
         public async Task<ActionResult<GenericResponse<bool>>> CreateRoom([FromBody] AdminRoomCreationDTO roomToCreate)
         {
             var result = await _roomService.CreateRoomAsync(roomToCreate);
@@ -49,6 +52,7 @@ namespace HMS.API.Controllers
             return HandleResponse(result);
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPut("{id}")]
         public async Task<ActionResult<GenericResponse<bool>>> UpdateRoom(int id, [FromBody] AdminRoomUpdateDTO roomToUpdate)
         {
@@ -57,6 +61,7 @@ namespace HMS.API.Controllers
             return HandleResponse(result);
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
         public async Task<ActionResult<GenericResponse<bool>>> DeleteRoom(int id)
         {
@@ -65,6 +70,7 @@ namespace HMS.API.Controllers
             return HandleResponse(result);
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPost("{id}/images")]
         public async Task<ActionResult<GenericResponse<bool>>> UploadImages([FromRoute] int id, [FromForm] List<IFormFile> files)
         {
@@ -73,6 +79,7 @@ namespace HMS.API.Controllers
             return HandleResponse(result);
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{id}/images/{imageId}")]
         public async Task<ActionResult<GenericResponse<bool>>> DeleteImages([FromRoute] int id, [FromRoute] int imageId)
         {
