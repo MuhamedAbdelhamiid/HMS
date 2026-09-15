@@ -97,7 +97,6 @@ namespace HMS.Services
         #endregion
 
         #region Admin Services
-        // should return all rooms (including NotExist & In Maintenance)
         public async Task<GenericResponse<IEnumerable<AdminRoomDTO>>> GetAllRoomsForAdminAsync(AdminRoomQueryParameters? adminQueryParameters)
         {
             var genericResponse =
