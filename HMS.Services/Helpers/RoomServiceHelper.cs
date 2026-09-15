@@ -1,5 +1,5 @@
 ﻿using HMS.Core.Entities.Enums.RoomEnums;
-using HMS.Core.Entities.RoomModuleEntities;
+using HMS.Core.Entities.RoomModule;
 using HMS.Shared.QueryParameters.RoomModule;
 using System.Linq.Expressions;
 

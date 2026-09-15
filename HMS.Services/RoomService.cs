@@ -1,7 +1,7 @@
 using AutoMapper;
 using HMS.Core.Contracts;
 using HMS.Core.Entities.Enums.RoomEnums;
-using HMS.Core.Entities.RoomModuleEntities;
+using HMS.Core.Entities.RoomModule;
 using HMS.Services.Abstraction;
 using HMS.Services.Helpers;
 using HMS.Shared.DTOs.RoomModuleDTOs;
