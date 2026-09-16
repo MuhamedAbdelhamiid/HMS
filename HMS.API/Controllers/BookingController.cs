@@ -3,6 +3,7 @@ using HMS.Shared.DTOs.BookingModuleDTOs;
 using HMS.Shared.Responses;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace HMS.API.Controllers
 {
@@ -19,8 +20,8 @@ namespace HMS.API.Controllers
         [HttpPost]
         public async Task<ActionResult<GenericResponse<string>>> CreateBooking([FromBody] CreateBookingDTO bookingRequest)
         {
-            var userId = User.FindFirst("NameId")!.Value;
-            var result = await _bookingService.CreateBookingAsync(userId, bookingRequest);
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var result = await _bookingService.CreateBookingAsync(userId!, bookingRequest);
 
             return HandleResponse(result);
         }
