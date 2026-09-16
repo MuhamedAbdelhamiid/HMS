@@ -18,6 +18,9 @@ namespace HMS.Services.Profiles.SecurityModuleProfiles
                 .ForMember(dest => dest.IsActive, opt => opt.MapFrom(src => true))
                 .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.Email.Substring(0, src.Email.IndexOf('@'))))
                 .ForMember(dest => dest.Specialities, opt => opt.Ignore());
+
+            CreateMap<HotelUser, UserInfoDTO>();
+
         }
     }
 }

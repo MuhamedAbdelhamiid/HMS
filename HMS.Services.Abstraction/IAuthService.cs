@@ -11,7 +11,7 @@ namespace HMS.Services.Abstraction
         Task<GenericResponse<bool>> DeactivateUserAsync(string userId);
         Task<GenericResponse<bool>> ActivateUserAsync(string userId);
         Task<GenericResponse<bool>> CheckEmailExistsAsync(string email);
-        Task<GenericResponse<IEnumerable<UserResponseDTO>>> GetAllUsersAsync();
-        Task<GenericResponse<UserInfoDTO>> GetUserInfo(string userId);
+        Task<GenericResponse<IEnumerable<UserInfoDTO>>> GetAllUsersAsync();
+        Task<GenericResponse<UserInfoDTO>> GetUserInfoAsync(string userId);
     }
 }

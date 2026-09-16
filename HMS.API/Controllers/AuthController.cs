@@ -3,6 +3,7 @@ using HMS.Shared.DTOs.SecurityModuleDTOs;
 using HMS.Shared.Responses;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace HMS.API.Controllers
 {
@@ -32,7 +33,7 @@ namespace HMS.API.Controllers
         }
 
         [Authorize(Roles = "Admin")]
-        [HttpPost("create-user")]
+        [HttpPost("create-staff")]
         public async Task<ActionResult<GenericResponse<bool>>> CreateStaff([FromBody] StaffCreationDTO staffCreationDTO)
         {
             var result = await _authService.CreateStaffAccountAsync(staffCreationDTO);
@@ -63,6 +64,22 @@ namespace HMS.API.Controllers
         public async Task<ActionResult<GenericResponse<bool>>> CheckEmail([FromQuery] string email)
         {
             var result = await _authService.CheckEmailExistsAsync(email);
+            return HandleResponse(result);
+        }
+
+        [Authorize]
+        [HttpGet("users")]
+        public async Task<ActionResult<GenericResponse<IEnumerable<UserInfoDTO>>>> GetAllUsers()
+        {
+            var result = await _authService.GetAllUsersAsync();
+            return HandleResponse(result);
+        }
+        [Authorize]
+        [HttpGet("profile")]
+        public async Task<ActionResult<GenericResponse<IEnumerable<UserInfoDTO>>>> GetUser()
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var result = await _authService.GetUserInfoAsync(userId!);
             return HandleResponse(result);
         }
     }
