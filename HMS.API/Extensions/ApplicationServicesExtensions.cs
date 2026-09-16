@@ -34,8 +34,10 @@ namespace HMS.API.Extensions
             services.AddScoped<IRoomService, RoomService>();
             services.AddTransient<RoomImageValueResolver>();
             services.AddTransient<IAttachmentService, AttachmentService>();
-            services.AddScoped<IAuthService, AuthService>();
             services.AddSingleton<IEmailService, EmailService>();
+            services.AddScoped<IAuthService, AuthService>();
+            services.AddScoped<IBookingService, BookingService>();
+
 
             services.AddAutoMapper(typeof(RoomProfile).Assembly);
 
