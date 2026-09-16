@@ -1,11 +1,7 @@
-﻿using HMS.Core.Entities.Enums.RoomEnums;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using HMS.Core.Entities.BookingModule;
+using HMS.Core.Entities.Enums.RoomEnums;
 
-namespace HMS.Core.Entities.RoomModuleEntities
+namespace HMS.Core.Entities.RoomModule
 {
     public class Room : BaseEntity<int>
     {
@@ -14,6 +10,17 @@ namespace HMS.Core.Entities.RoomModuleEntities
         public string Amenities { get; set; } = default!;
         public RoomStatus Status { get; set; }
         public RoomType RoomType { get; set; }
+
+        #region Relationships
+
+        #region Images
         public ICollection<RoomImage> Images { get; set; } = [];
+        #endregion
+
+        #region Bookings
+        public ICollection<BookingEntity> Bookings { get; set; } = [];
+        #endregion
+
+        #endregion
     }
 }
