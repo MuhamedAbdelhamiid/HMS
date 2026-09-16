@@ -47,13 +47,24 @@ namespace HMS.Infrastructure.Repository
         public async Task<TEntity?> GetByIdAsync(TKey id)
         => await _dbContext.Set<TEntity>().FindAsync(id);
 
-        public async Task<TEntity?> GetByIdAsync(TKey id, Expression<Func<TEntity, object>>? includes = null
+        public async Task<TEntity?> GetByIdAsync(TKey id, Expression<Func<TEntity, object>>? include = null
+            )
+        {
+            var query = GetQueryable();
+
+            if (include is not null)
+                query = query.Include(include);
+
+            return await query.FirstOrDefaultAsync(e => e.Id!.Equals(id));
+        }
+        public async Task<TEntity?> GetByIdAsync(TKey id, List<Expression<Func<TEntity, object>>>? includes = null
             )
         {
             var query = GetQueryable();
 
             if (includes is not null)
-                query = query.Include(includes);
+                foreach (var include in includes)
+                    query = query.Include(include);
 
             return await query.FirstOrDefaultAsync(e => e.Id!.Equals(id));
         }

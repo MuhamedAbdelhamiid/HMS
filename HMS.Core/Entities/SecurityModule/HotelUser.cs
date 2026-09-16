@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using HMS.Core.Entities.BookingModule;
+using Microsoft.AspNetCore.Identity;
 
 namespace HMS.Core.Entities.SecurityModule
 {
@@ -8,5 +9,6 @@ namespace HMS.Core.Entities.SecurityModule
         public string FullName { get; set; } = default!;
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
+        public ICollection<BookingEntity> GuestBookings { get; set; } = [];
     }
 }

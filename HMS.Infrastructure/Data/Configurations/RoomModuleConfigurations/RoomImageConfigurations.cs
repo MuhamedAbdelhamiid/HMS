@@ -1,4 +1,4 @@
-﻿using HMS.Core.Entities.RoomModuleEntities;
+﻿using HMS.Core.Entities.RoomModule;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

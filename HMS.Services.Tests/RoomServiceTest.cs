@@ -2,7 +2,7 @@
 using FluentAssertions;
 using HMS.Core.Contracts;
 using HMS.Core.Entities.Enums.RoomEnums;
-using HMS.Core.Entities.RoomModuleEntities;
+using HMS.Core.Entities.RoomModule;
 using HMS.Services.Abstraction;
 using HMS.Shared.DTOs.RoomModuleDTOs;
 using HMS.Shared.QueryParameters.RoomModule;

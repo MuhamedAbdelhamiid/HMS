@@ -1,4 +1,4 @@
-﻿namespace HMS.Core.Entities.RoomModuleEntities
+﻿namespace HMS.Core.Entities.RoomModule
 {
     public class RoomImage : BaseEntity<int>
     {

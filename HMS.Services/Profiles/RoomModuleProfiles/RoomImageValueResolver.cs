@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using HMS.Core.Entities.RoomModuleEntities;
+using HMS.Core.Entities.RoomModule;
 using HMS.Shared.DTOs.RoomModuleDTOs;
 using Microsoft.Extensions.Configuration;
 

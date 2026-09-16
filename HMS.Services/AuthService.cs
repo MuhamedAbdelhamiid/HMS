@@ -40,102 +40,56 @@ namespace HMS.Services
 
         public async Task<GenericResponse<UserResponseDTO>> LoginAsync(UserLoginDTO userLoginDTO)
         {
-            var genericResponse = new GenericResponse<UserResponseDTO>()
-            {
-                StatusCode = StatusCodes.Status200OK
-            };
-
             try
             {
                 if (userLoginDTO is null)
-                {
-                    genericResponse.StatusCode = StatusCodes.Status400BadRequest;
-                    genericResponse.Message = "No data was sent.";
-                    return genericResponse;
-                }
+                    return GenericResponse<UserResponseDTO>.Error("No data was sent.", StatusCodes.Status400BadRequest);
 
                 var user = await _userManager.FindByEmailAsync(userLoginDTO.Email);
 
                 if (user is null)
-                {
-                    genericResponse.StatusCode = StatusCodes.Status401Unauthorized;
-                    genericResponse.Message = "Invalid Credentials.";
-                    return genericResponse;
-                }
+                    return GenericResponse<UserResponseDTO>.Error("Invalid Credentials.", StatusCodes.Status401Unauthorized);
 
                 if (!user.IsActive)
-                {
-                    genericResponse.StatusCode = StatusCodes.Status423Locked;
-                    genericResponse.Message = "User account are locked, Please contact with administration.";
-                    return genericResponse;
-                }
-
+                    return GenericResponse<UserResponseDTO>.Error("User account is locked. Please contact administration.", StatusCodes.Status423Locked);
 
                 var userIsAuthenticated = await _userManager.CheckPasswordAsync(user, userLoginDTO.Password);
 
                 if (!userIsAuthenticated)
-                {
-                    genericResponse.StatusCode = StatusCodes.Status401Unauthorized;
-                    genericResponse.Message = "Invalid Credentials.";
-                    return genericResponse;
-                }
+                    return GenericResponse<UserResponseDTO>.Error("Invalid Credentials.", StatusCodes.Status401Unauthorized);
 
                 var token = await GenerateTokenAsync(user);
-                genericResponse.Data = new UserResponseDTO(token, user.UserName!, user.Email!);
-                genericResponse.Message = "User logged in successfully.";
-
-                return genericResponse;
+                return GenericResponse<UserResponseDTO>.Success(
+                    new UserResponseDTO(token, user.UserName!, user.Email!),
+                    "User logged in successfully.");
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred while logging in.");
-                genericResponse.StatusCode = StatusCodes.Status500InternalServerError;
-                genericResponse.Message = "An error occurred while logging in.";
-                return genericResponse;
+                return GenericResponse<UserResponseDTO>.Failure("An error occurred while logging in.");
             }
         }
 
         public async Task<GenericResponse<UserResponseDTO>> RegisterAsync(UserRegisterDTO userRegisterDTO)
         {
-            var genericResponse = new GenericResponse<UserResponseDTO>()
-            {
-                StatusCode = StatusCodes.Status200OK
-            };
-
             try
             {
                 if (userRegisterDTO is null)
-                {
-                    genericResponse.StatusCode = StatusCodes.Status400BadRequest;
-                    genericResponse.Message = "Invalid user data";
-                    return genericResponse;
-                }
+                    return GenericResponse<UserResponseDTO>.Error("Invalid user data", StatusCodes.Status400BadRequest);
 
                 var userWithThisEmail = await _userManager.FindByEmailAsync(userRegisterDTO.Email);
 
                 if (userWithThisEmail is not null)
-                {
-                    genericResponse.StatusCode = StatusCodes.Status409Conflict;
-                    genericResponse.Message = "Email already exists, please add a new one";
-                    return genericResponse;
-                }
+                    return GenericResponse<UserResponseDTO>.Error("Email already exists, please add a new one", StatusCodes.Status409Conflict);
 
                 var userToAdd = _mapper.Map<HotelUser>(userRegisterDTO);
                 var result = await _userManager.CreateAsync(userToAdd, userRegisterDTO.Password);
 
                 if (!result.Succeeded)
-                {
-                    genericResponse.StatusCode = StatusCodes.Status400BadRequest;
-                    genericResponse.Message = string.Join(", ", result.Errors.Select(e => e.Description));
-                    return genericResponse;
-                }
+                    return GenericResponse<UserResponseDTO>.Error(string.Join(", ", result.Errors.Select(e => e.Description)), StatusCodes.Status400BadRequest);
 
                 await _userManager.AddToRoleAsync(userToAdd, "Guest");
-
                 var token = await GenerateTokenAsync(userToAdd);
-
-                genericResponse.Data = new UserResponseDTO(token, userToAdd.UserName!, userToAdd.Email!);
-                genericResponse.Message = "Account created successfully.";
 
                 try
                 {
@@ -145,7 +99,6 @@ namespace HMS.Services
                         Subject = "Welcome Message",
                         Message = $"Welcome To Our Hotel, {userToAdd.FullName}"
                     };
-
                     await _emailService.SendEmailAsync(emailToSend);
                 }
                 catch (Exception ex)
@@ -153,182 +106,106 @@ namespace HMS.Services
                     _logger.LogError(ex, "Failed to send welcome email.");
                 }
 
-                return genericResponse;
+                return GenericResponse<UserResponseDTO>.Success(
+                    new UserResponseDTO(token, userToAdd.UserName!, userToAdd.Email!),
+                    "Account created successfully.");
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred while registering the user.");
-                genericResponse.StatusCode = StatusCodes.Status500InternalServerError;
-                genericResponse.Message = "An error occurred while creating the account.";
-                return genericResponse;
+                return GenericResponse<UserResponseDTO>.Failure("An error occurred while creating the account.");
             }
         }
 
         public async Task<GenericResponse<bool>> CreateStaffAccountAsync(StaffCreationDTO staffCreationDTO)
         {
-            var genericResponse = new GenericResponse<bool>()
-            {
-                StatusCode = StatusCodes.Status200OK
-            };
-
             try
             {
                 if (staffCreationDTO is null)
-                {
-                    genericResponse.StatusCode = StatusCodes.Status400BadRequest;
-                    genericResponse.Message = "Invalid staff data";
-                    return genericResponse;
-                }
+                    return GenericResponse<bool>.Error("Invalid staff data", StatusCodes.Status400BadRequest);
 
                 var userWithThisEmail = await _userManager.FindByEmailAsync(staffCreationDTO.Email);
-
                 if (userWithThisEmail is not null)
-                {
-                    genericResponse.StatusCode = StatusCodes.Status409Conflict;
-                    genericResponse.Message = "Email already exists, please add a new one";
-                    return genericResponse;
-                }
+                    return GenericResponse<bool>.Error("Email already exists, please add a new one", StatusCodes.Status409Conflict);
 
                 var staffSpeciality = AuthServiceHelper.GetStaffSpeciality(staffCreationDTO.Specialty);
-
                 if (staffSpeciality is null)
-                {
-                    genericResponse.StatusCode = StatusCodes.Status400BadRequest;
-                    genericResponse.Message = "Invalid staff specialty.";
-                    return genericResponse;
-                }
+                    return GenericResponse<bool>.Error("Invalid staff specialty.", StatusCodes.Status400BadRequest);
 
                 var staffToAdd = _mapper.Map<StaffUser>(staffCreationDTO);
                 staffToAdd.UserName = staffCreationDTO.Email;
                 staffToAdd.Specialities = staffSpeciality.Value;
 
                 var createResult = await _userManager.CreateAsync(staffToAdd, staffCreationDTO.Password);
-
                 if (!createResult.Succeeded)
-                {
-                    genericResponse.StatusCode = StatusCodes.Status400BadRequest;
-                    genericResponse.Message = string.Join(", ", createResult.Errors.Select(e => e.Description));
-                    return genericResponse;
-                }
+                    return GenericResponse<bool>.Error(string.Join(", ", createResult.Errors.Select(e => e.Description)), StatusCodes.Status400BadRequest);
 
                 var roleResult = await _userManager.AddToRoleAsync(staffToAdd, "Staff");
-
                 if (!roleResult.Succeeded)
                 {
                     await _userManager.DeleteAsync(staffToAdd);
-                    genericResponse.StatusCode = StatusCodes.Status500InternalServerError;
-                    genericResponse.Message = "Failed to assign Staff role. The user was not created.";
-                    return genericResponse;
+                    return GenericResponse<bool>.Failure("Failed to assign Staff role. The user was not created.");
                 }
 
-                genericResponse.Data = true;
-                genericResponse.Message = "Staff account created successfully.";
-                return genericResponse;
+                return GenericResponse<bool>.Success(true, "Staff account created successfully.");
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred while creating a staff account.");
-                genericResponse.StatusCode = StatusCodes.Status500InternalServerError;
-                genericResponse.Message = "An error occurred while creating the staff account.";
-                genericResponse.Data = false;
-                return genericResponse;
+                return GenericResponse<bool>.Failure("An error occurred while creating the staff account.");
             }
         }
 
         public async Task<GenericResponse<bool>> DeactivateUserAsync(string userId)
-        => await SetUserActiveStateAsync(userId, isActive: false);
+            => await SetUserActiveStateAsync(userId, isActive: false);
 
         public async Task<GenericResponse<bool>> ActivateUserAsync(string userId)
-        => await SetUserActiveStateAsync(userId, isActive: true);
+            => await SetUserActiveStateAsync(userId, isActive: true);
 
         public async Task<GenericResponse<bool>> CheckEmailExistsAsync(string email)
         {
-            var genericResponse = new GenericResponse<bool>()
-            {
-                StatusCode = StatusCodes.Status200OK
-            };
-
             try
             {
                 if (string.IsNullOrWhiteSpace(email))
-                {
-                    genericResponse.StatusCode = StatusCodes.Status400BadRequest;
-                    genericResponse.Message = "Email is required.";
-                    genericResponse.Data = false;
-                    return genericResponse;
-                }
+                    return GenericResponse<bool>.Error("Email is required.", StatusCodes.Status400BadRequest);
 
                 var user = await _userManager.FindByEmailAsync(email);
-                genericResponse.Data = user is not null;
-                genericResponse.Message = "Email check completed.";
-                return genericResponse;
+                return GenericResponse<bool>.Success(user is not null, "Email check completed.");
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred while checking email existence.");
-                genericResponse.StatusCode = StatusCodes.Status500InternalServerError;
-                genericResponse.Message = "An error occurred while checking the email.";
-                genericResponse.Data = false;
-                return genericResponse;
+                return GenericResponse<bool>.Failure("An error occurred while checking the email.");
             }
         }
 
         #region Helper Methods
         private async Task<GenericResponse<bool>> SetUserActiveStateAsync(string userId, bool isActive)
         {
-            var genericResponse = new GenericResponse<bool>()
-            {
-                StatusCode = StatusCodes.Status200OK
-            };
-
             var actionName = isActive ? "activating" : "deactivating";
 
             try
             {
                 if (string.IsNullOrWhiteSpace(userId))
-                {
-                    genericResponse.StatusCode = StatusCodes.Status400BadRequest;
-                    genericResponse.Message = "User id is required.";
-                    genericResponse.Data = false;
-                    return genericResponse;
-                }
+                    return GenericResponse<bool>.Error("User id is required.", StatusCodes.Status400BadRequest);
 
                 var user = await _userManager.FindByIdAsync(userId);
-
                 if (user is null)
-                {
-                    genericResponse.StatusCode = StatusCodes.Status404NotFound;
-                    genericResponse.Message = "User was not found.";
-                    genericResponse.Data = false;
-                    return genericResponse;
-                }
+                    return GenericResponse<bool>.Error("User was not found.", StatusCodes.Status404NotFound);
 
                 user.IsActive = isActive;
                 user.UpdatedAt = DateTime.UtcNow;
 
                 var updateResult = await _userManager.UpdateAsync(user);
-
                 if (!updateResult.Succeeded)
-                {
-                    genericResponse.StatusCode = StatusCodes.Status400BadRequest;
-                    genericResponse.Message = string.Join(", ", updateResult.Errors.Select(e => e.Description));
-                    genericResponse.Data = false;
-                    return genericResponse;
-                }
+                    return GenericResponse<bool>.Error(string.Join(", ", updateResult.Errors.Select(e => e.Description)), StatusCodes.Status400BadRequest);
 
-                genericResponse.Data = true;
-                genericResponse.Message = isActive
-                    ? "User activated successfully."
-                    : "User deactivated successfully.";
-                return genericResponse;
+                return GenericResponse<bool>.Success(true, isActive ? "User activated successfully." : "User deactivated successfully.");
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred while {Action} user with id {UserId}.", actionName, userId);
-                genericResponse.StatusCode = StatusCodes.Status500InternalServerError;
-                genericResponse.Message = $"An error occurred while {actionName} the user.";
-                genericResponse.Data = false;
-                return genericResponse;
+                return GenericResponse<bool>.Failure($"An error occurred while {actionName} the user.");
             }
         }
 
@@ -349,10 +226,7 @@ namespace HMS.Services
             var issuer = _configuration.GetSection("JWTOptions")["Issuer"];
             var audience = _configuration.GetSection("JWTOptions")["Audience"];
 
-            var key = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(secretKey!)
-                );
-
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey!));
             var singingCred = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
             var token = new JwtSecurityToken(
@@ -361,7 +235,7 @@ namespace HMS.Services
                 claims: userClaims,
                 expires: DateTime.UtcNow.AddHours(1),
                 signingCredentials: singingCred
-                );
+            );
 
             var tokenHandler = new JwtSecurityTokenHandler();
             return tokenHandler.WriteToken(token);
