@@ -1,6 +1,5 @@
 ﻿using HMS.Core.Entities.Enums.RoomEnums;
 using HMS.Core.Entities.RoomModule;
-using HMS.Shared.QueryParameters.RoomModule;
 using System.Linq.Expressions;
 
 namespace HMS.Services.Helpers
@@ -30,26 +29,6 @@ namespace HMS.Services.Helpers
             }
         }
 
-        public static Expression<Func<Room, bool>> BuildFilterExpression(RoomQueryParameters queryParameters)
-            => r =>
-                (r.Status == RoomStatus.Available || r.Status == RoomStatus.Reserved) &&
-                (string.IsNullOrEmpty(queryParameters.RoomType) ||
-                    r.RoomType == GetRoomType(queryParameters.RoomType)) &&
-                (!queryParameters.MaxPrice.HasValue || r.PricePerNight <= queryParameters.MaxPrice.Value) &&
-                (!queryParameters.MinPrice.HasValue || r.PricePerNight >= queryParameters.MinPrice.Value);
-
-        public static Expression<Func<Room, bool>> BuildFilterExpression(
-            AdminRoomQueryParameters queryParameters)
-            => r =>
-                (string.IsNullOrEmpty(queryParameters.Status) ||
-                    r.Status == GetRoomStatus(queryParameters.Status)) &&
-                (string.IsNullOrEmpty(queryParameters.RoomType) ||
-                    r.RoomType == GetRoomType(queryParameters.RoomType)) &&
-                (!queryParameters.MaxPrice.HasValue ||
-                    r.PricePerNight <= queryParameters.MaxPrice.Value) &&
-                (!queryParameters.MinPrice.HasValue ||
-                    r.PricePerNight >= queryParameters.MinPrice.Value);
-
         public static RoomType? GetRoomType(string roomType)
          => roomType.ToLower() switch
          {
@@ -64,7 +43,7 @@ namespace HMS.Services.Helpers
             {
                 "available" => RoomStatus.Available,
                 "reserved" => RoomStatus.Reserved,
-                "maintenance" => RoomStatus.Maintenance,
+                "maintenance" => RoomStatus.InMaintenance,
                 "notexist" => RoomStatus.NotExist,
                 _ => null
             };

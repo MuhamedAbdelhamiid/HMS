@@ -44,6 +44,20 @@ namespace HMS.Infrastructure.Repository
             return await query.AsNoTracking().ToListAsync();
         }
 
+        public async Task<IEnumerable<TEntity>> GetAllAsync(Expression<Func<TEntity, bool>>? filter = null, List<Expression<Func<TEntity, object>>>? includes = null)
+        {
+            var query = GetQueryable();
+
+            if (filter is not null)
+                query = query.Where(filter);
+
+            if (includes is not null)
+                foreach (var include in includes)
+                    query = query.Include(include);
+
+            return await query.ToListAsync();
+        }
+
         public async Task<TEntity?> GetByIdAsync(TKey id)
         => await _dbContext.Set<TEntity>().FindAsync(id);
 

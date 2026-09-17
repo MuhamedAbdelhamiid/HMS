@@ -10,6 +10,7 @@ namespace HMS.Services.Profiles.BookingModuleProfiles
         public BookingProfile()
         {
             CreateMap<CreateBookingDTO, BookingEntity>()
+                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => Guid.NewGuid()))
                 .ForMember(dest => dest.HotelUserId, opt => opt.Ignore())
                 .ForMember(dest => dest.TotalAmount, opt => opt.Ignore());
 
@@ -17,7 +18,10 @@ namespace HMS.Services.Profiles.BookingModuleProfiles
                 .ForMember(dest => dest.BookingId, opt => opt.MapFrom(src => src.Id))
                 .ForMember(dest => dest.PaymentStatus, opt => opt.MapFrom(src => src.Status.ToString()));
 
-
+            CreateMap<BookingEntity, BookingDTO>()
+                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()))
+                .ForMember(dest => dest.UserFullName, opt => opt.MapFrom(src => src.User.FullName));
+            ;
         }
     }
 }
