@@ -1,5 +1,6 @@
 ﻿using HMS.Services.Abstraction;
 using HMS.Shared.DTOs.BookingModuleDTOs;
+using HMS.Shared.QueryParameters.BookingModule;
 using HMS.Shared.Responses;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -33,6 +34,24 @@ namespace HMS.API.Controllers
         public async Task<ActionResult<GenericResponse<string>>> CreatePaymentUrl(Guid id)
         {
             var result = await _paymentService.ProcessPaymentAsync(id);
+
+            return HandleResponse(result);
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpGet("admin")]
+        public async Task<ActionResult<GenericResponse<IEnumerable<BookingDTO>>>> GetAllBookings([FromQuery] BookingQueryParams? queryParams)
+        {
+            var result = await _bookingService.GetAllBookingsForAdminAsync(queryParams);
+
+            return HandleResponse(result);
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpPut("{id}/cancel")]
+        public async Task<ActionResult<GenericResponse<bool>>> CancelBooking(Guid id)
+        {
+            var result = await _bookingService.CancelBookingAsync(id);
 
             return HandleResponse(result);
         }

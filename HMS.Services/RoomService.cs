@@ -43,7 +43,7 @@ namespace HMS.Services
                 Expression<Func<Room, object>>? orderBy, orderByDesc;
                 RoomServiceHelper.BuildSortExpression(queryParameters.Sort, out orderBy, out orderByDesc);
 
-                rooms = await roomRepo.GetAllAsync(filter: RoomServiceHelper.BuildFilterExpression(queryParameters),
+                rooms = await roomRepo.GetAllAsync(filter: FilterHelper.BuildFilterExpression(queryParameters),
                    orderBy: orderBy,
                    orderByDesc: orderByDesc);
             }
@@ -80,7 +80,7 @@ namespace HMS.Services
                 Expression<Func<Room, object>>? orderBy, orderByDesc;
                 RoomServiceHelper.BuildSortExpression(adminQueryParameters.Sort, out orderBy, out orderByDesc);
 
-                rooms = await roomRepo.GetAllAsync(filter: RoomServiceHelper.BuildFilterExpression(adminQueryParameters),
+                rooms = await roomRepo.GetAllAsync(filter: FilterHelper.BuildFilterExpression(adminQueryParameters),
                    orderBy: orderBy,
                    orderByDesc: orderByDesc);
             }

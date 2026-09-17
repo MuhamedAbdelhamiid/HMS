@@ -8,6 +8,6 @@
         public bool IsActive { get; set; }
         public string UserName { get; set; } = default!;
         public string FullName { get; set; } = default!;
-        public ICollection<BookingDTO> Bookings { get; set; } = default!;
+        public ICollection<UserBookingDTO> Bookings { get; set; } = default!;
     }
 }
