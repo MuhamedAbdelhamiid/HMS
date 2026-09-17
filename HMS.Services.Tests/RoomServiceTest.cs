@@ -217,7 +217,7 @@ namespace HMS.Services.Tests
             var InMaintenanceRoom = new Room
             {
                 Id = 1,
-                Status = RoomStatus.Maintenance
+                Status = RoomStatus.InMaintenance
             };
             _mockRoomRepo.Setup(repo => repo.GetByIdAsync(1, It.IsAny<Expression<Func<Room, object>>>())).ReturnsAsync(InMaintenanceRoom);
 

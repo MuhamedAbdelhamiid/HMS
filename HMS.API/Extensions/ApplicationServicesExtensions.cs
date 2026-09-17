@@ -37,6 +37,8 @@ namespace HMS.API.Extensions
             services.AddSingleton<IEmailService, EmailService>();
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<IBookingService, BookingService>();
+            services.AddHttpClient<IPaymentService, PaymentService>();
+            services.AddScoped<IPaymentService, PaymentService>();
 
 
             services.AddAutoMapper(typeof(RoomProfile).Assembly);

@@ -5,6 +5,6 @@ namespace HMS.Services.Abstraction
 {
     public interface IBookingService
     {
-        Task<GenericResponse<string>> CreateBookingAsync(string userId, CreateBookingDTO bookingRequest);
+        Task<GenericResponse<Guid>> CreateBookingAsync(string userId, CreateBookingDTO bookingRequest);
     }
 }

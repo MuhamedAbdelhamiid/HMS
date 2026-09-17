@@ -64,7 +64,7 @@ namespace HMS.Services.Helpers
             {
                 "available" => RoomStatus.Available,
                 "reserved" => RoomStatus.Reserved,
-                "maintenance" => RoomStatus.Maintenance,
+                "maintenance" => RoomStatus.InMaintenance,
                 "notexist" => RoomStatus.NotExist,
                 _ => null
             };

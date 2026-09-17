@@ -1,6 +1,8 @@
 ﻿using AutoMapper;
 using HMS.Core.Contracts;
 using HMS.Core.Entities.BookingModule;
+using HMS.Core.Entities.Enums.BookingEnums;
+using HMS.Core.Entities.Enums.RoomEnums;
 using HMS.Core.Entities.RoomModule;
 using HMS.Services.Abstraction;
 using HMS.Shared.DTOs.BookingModuleDTOs;
@@ -23,25 +25,25 @@ namespace HMS.Services
             _logger = logger;
         }
 
-        public async Task<GenericResponse<string>> CreateBookingAsync(string userId, CreateBookingDTO bookingRequest)
+        public async Task<GenericResponse<Guid>> CreateBookingAsync(string userId, CreateBookingDTO bookingRequest)
         {
             if (bookingRequest is null)
-                return GenericResponse<string>.Error(
+                return GenericResponse<Guid>.Error(
                     "Invalid booking request.", StatusCodes.Status400BadRequest);
 
             if (bookingRequest.CheckInDate < DateTime.UtcNow.Date || bookingRequest.CheckOutDate < DateTime.UtcNow.Date)
-                return GenericResponse<string>.Error(
+                return GenericResponse<Guid>.Error(
                     "Dates cannot be in the past.", StatusCodes.Status400BadRequest);
 
             var roomRepo = _unitOfWork.GetRepository<Room, int>();
             var room = await roomRepo.GetByIdAsync(bookingRequest.RoomId, r => r.Bookings);
 
             if (room is null)
-                return GenericResponse<string>.Error(
+                return GenericResponse<Guid>.Error(
                     "Room not found", StatusCodes.Status404NotFound);
 
             if (!RoomIsAvailableForBookingWithinDate(room, bookingRequest.CheckInDate, bookingRequest.CheckOutDate))
-                return GenericResponse<string>.Error("Room is not available for the specified dates.", StatusCodes.Status400BadRequest);
+                return GenericResponse<Guid>.Error("Room is not available for the specified dates.", StatusCodes.Status400BadRequest);
 
             var booking = _mapper.Map<BookingEntity>(bookingRequest);
             booking.HotelUserId = userId;
@@ -53,15 +55,17 @@ namespace HMS.Services
                 await bookingRepo.AddAsync(booking);
                 await _unitOfWork.SaveChangesAsync();
 
-                return GenericResponse<string>.Success(booking.Id.ToString(), "Booking created successfully", StatusCodes.Status201Created);
+                return GenericResponse<Guid>.Success(booking.Id, "Booking created successfully", StatusCodes.Status201Created);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred while creating the booking");
-                return GenericResponse<string>.Failure("An error occurred while creating the booking.");
+                return GenericResponse<Guid>.Failure("An error occurred while creating the booking.");
             }
         }
 
+
+        #region Helper Methods
         private decimal CalculateTotalAmount(Room room, DateTime checkInDate, DateTime checkOutDate)
         {
             var numberOfDays = (checkOutDate - checkInDate).Days == 0 ? 1 : (checkOutDate - checkInDate).Days;
@@ -69,15 +73,17 @@ namespace HMS.Services
             var totalAmount = room.PricePerNight * numberOfDays;
             return totalAmount;
         }
-
-        #region Helper Methods
         private bool RoomIsAvailableForBookingWithinDate(Room room, DateTime checkInDate, DateTime checkOutDate)
         {
             var bookings = room.Bookings;
 
             foreach (var booking in bookings)
-                if (checkInDate < booking.CheckOutDate && checkOutDate > booking.CheckInDate)
+                if (checkInDate < booking.CheckOutDate && checkOutDate > booking.CheckInDate &&
+                    (booking.Status == BookingStatus.Paid || booking.Status == BookingStatus.Pending))
                     return false;
+
+            if (room.Status == RoomStatus.NotExist || room.Status == RoomStatus.InMaintenance)
+                return false;
 
             return true;
         }

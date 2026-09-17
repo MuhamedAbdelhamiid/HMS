@@ -4,7 +4,7 @@
     {
         Available,
         Reserved,
-        Maintenance,
+        InMaintenance,
         NotExist
     }
 }

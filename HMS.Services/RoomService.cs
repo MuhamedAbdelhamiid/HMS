@@ -261,7 +261,7 @@ namespace HMS.Services
             if (room is null || room.Status == RoomStatus.NotExist)
                 return GenericResponse<RoomDetailsDTO>.Error($"No room found with the specified id: {id}", StatusCodes.Status404NotFound);
 
-            if (room.Status == RoomStatus.Maintenance)
+            if (room.Status == RoomStatus.InMaintenance)
                 return GenericResponse<RoomDetailsDTO>.Error($"Room with id: {id} in maintenance.", StatusCodes.Status404NotFound);
 
             var roomToReturn = _mapper.Map<RoomDetailsDTO>(room);
@@ -272,7 +272,7 @@ namespace HMS.Services
         {
             switch (room.Status)
             {
-                case RoomStatus.Available or RoomStatus.Maintenance:
+                case RoomStatus.Available or RoomStatus.InMaintenance:
                     return await SoftDeleteRoomAsync(room, roomRepo);
                 case RoomStatus.Reserved:
                     return GenericResponse<bool>.Error($"Room with id: {room.Id} is reserved and can not be deleted.", StatusCodes.Status400BadRequest);
