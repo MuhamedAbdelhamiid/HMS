@@ -1,6 +1,7 @@
 using HMS.API.Extensions;
 using HMS.Core.Contracts;
 using HMS.Infrastructure.Data.DataSeed;
+using HMS.Infrastructure.ExternalServices.Hubs;
 
 namespace HMS.API
 {
@@ -48,6 +49,7 @@ namespace HMS.API
 
 
             app.MapControllers();
+            app.MapHub<ServiceHub>("/service");
             #endregion
 
             app.Run();
