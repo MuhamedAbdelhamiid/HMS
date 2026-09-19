@@ -36,9 +36,9 @@ namespace HMS.API.Extensions
         {
             await using var scope = app.Services.CreateAsyncScope();
 
-            var IdentityDataInitializer = scope.ServiceProvider.GetRequiredKeyedService<IDataInitializer>("Application");
+            var applicationDataInitializer = scope.ServiceProvider.GetRequiredKeyedService<IDataInitializer>("Application");
 
-            await IdentityDataInitializer.InitializeAsync();
+            await applicationDataInitializer.InitializeAsync();
 
             return app;
         }

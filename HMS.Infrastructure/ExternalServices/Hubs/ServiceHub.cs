@@ -5,14 +5,14 @@ namespace HMS.Infrastructure.ExternalServices.Hubs
 {
     public class ServiceHub : Hub
     {
-        public override Task OnConnectedAsync()
+        public override async Task OnConnectedAsync()
         {
             var role = Context.User!.FindFirstValue(ClaimTypes.Role);
 
             if (!string.IsNullOrWhiteSpace(role) && role.ToLower() == "admin")
-                Groups.AddToGroupAsync(Context.ConnectionId, "Admins");
+                await Groups.AddToGroupAsync(Context.ConnectionId, "Admins");
 
-            return base.OnConnectedAsync();
+            await base.OnConnectedAsync();
         }
     }
 }

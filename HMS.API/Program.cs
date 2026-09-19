@@ -26,6 +26,7 @@ namespace HMS.API
 
             await app.MigrateDatabaseAsync();
             await app.IdentitySeedAsync();
+            await app.ApplicationDataSeedAsync();
             #endregion
 
             #region Middleware Configurations

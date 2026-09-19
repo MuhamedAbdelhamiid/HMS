@@ -14,7 +14,7 @@ namespace HMS.Infrastructure.ExternalServices
             _hubContext = hubContext;
         }
         public async Task NotifyAdminsNewRequestAsync(NewRequestMessageForAdmin messageForAdmin)
-        => await _hubContext.Clients.Groups("Admin").SendAsync("NewRequestSent", messageForAdmin);
+        => await _hubContext.Clients.Group("Admins").SendAsync("NewRequestSent", messageForAdmin);
 
         public async Task NotifyGuestStatusUpdateAsync(string userId, StatusUpdateForUser updateForUser)
         => await _hubContext.Clients.User(userId).SendAsync("UpdateStatusForUser", updateForUser);

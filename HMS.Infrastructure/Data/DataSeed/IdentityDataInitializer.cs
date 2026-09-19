@@ -60,6 +60,7 @@ namespace HMS.Infrastructure.Data.DataSeed
                         CreatedAt = DateTime.UtcNow,
                         Email = "saeedmostafa@gmail.com",
                         IsActive = true,
+                        UserName = "SaeedMostafa",
                         PhoneNumber = "+2010153912364",
                         Specialities = StaffSpecialities.HouseKeeping
                     },
@@ -68,6 +69,7 @@ namespace HMS.Infrastructure.Data.DataSeed
                         FullName = "Mohamed Mohsen",
                         CreatedAt = DateTime.UtcNow,
                         Email = "mohamedmohsen@gmail.com",
+                        UserName = "MuMohsen",
                         IsActive = true,
                         PhoneNumber = "+2010153234264",
                         Specialities = StaffSpecialities.Laundry
@@ -77,6 +79,7 @@ namespace HMS.Infrastructure.Data.DataSeed
                         FullName = "Mostafa Mohsen",
                         CreatedAt = DateTime.UtcNow,
                         Email = "mostafamohsen@gmail.com",
+                        UserName = "MostafaMohsen",
                         IsActive = true,
                         PhoneNumber = "+201015323264",
                         Specialities = StaffSpecialities.FoodAndBeverage
@@ -85,7 +88,7 @@ namespace HMS.Infrastructure.Data.DataSeed
 
                 foreach (var staff in staffListToAdd)
                 {
-                    await _userManager.CreateAsync(staff);
+                    await _userManager.CreateAsync(staff, "P@ssw0rd");
                     await _userManager.AddToRoleAsync(staff, "Staff");
                 }
             }
