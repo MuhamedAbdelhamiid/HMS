@@ -8,7 +8,8 @@ namespace HMS.Shared.DTOs.ServiceModuleDTOs
         public int ServiceId { get; set; }
         [Required(ErrorMessage = "Booking id is required.")]
         public Guid BookingId { get; set; }
-        [Required(ErrorMessage = "Notes is required.")]
+        [Required(ErrorMessage = "Room number is required.")]
+        public int RoomNumber { get; set; }
         public string? Notes { get; set; }
     }
 }

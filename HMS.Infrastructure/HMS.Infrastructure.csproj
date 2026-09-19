@@ -15,4 +15,8 @@
     <ProjectReference Include="..\HMS.Services\HMS.Services.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Data\DataSeed\JsonDataSeed\" />
+  </ItemGroup>
+
 </Project>

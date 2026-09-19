@@ -1,5 +1,6 @@
 ﻿using HMS.Services.Abstraction;
 using HMS.Shared.DTOs.ServiceModuleDTOs;
+using HMS.Shared.QueryParameters.ServiceRequestModule;
 using HMS.Shared.Responses;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -58,9 +59,9 @@ namespace HMS.API.Controllers
 
         [Authorize]
         [HttpGet("requests")]
-        public async Task<ActionResult<IEnumerable<ServiceRequestDTO>>> GetAllServiceRequests()
+        public async Task<ActionResult<IEnumerable<ServiceRequestDTO>>> GetAllServiceRequests([FromQuery] ServiceRequestQueryParams? queryParams)
         {
-            var result = await _requestService.GetAllServiceRequestsAsync();
+            var result = await _requestService.GetAllServiceRequestsAsync(queryParams);
 
             return HandleResponse(result);
         }

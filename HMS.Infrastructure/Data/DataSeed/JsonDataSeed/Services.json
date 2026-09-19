@@ -1,0 +1,17 @@
+[
+  {
+    "Name": "House Keeping",
+    "Price": 250,
+    "Description": "Daily room cleaning and tidying service to keep your space fresh, organized, and comfortable throughout your stay."
+  },
+  {
+    "Name": "Laundry",
+    "Price": 150,
+    "Description": "Professional washing, drying, and ironing service for your clothes, delivered back to your room fresh and neatly folded."
+  },
+  {
+    "Name": "Food And Beverage",
+    "Price": 350,
+    "Description": "Enjoy a delicious selection of meals and drinks delivered straight to your room, anytime you crave a bite."
+  }
+]

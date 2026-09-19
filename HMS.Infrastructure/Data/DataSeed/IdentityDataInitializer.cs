@@ -1,4 +1,5 @@
 ﻿using HMS.Core.Contracts;
+using HMS.Core.Entities.Enums.SecurityEnums;
 using HMS.Core.Entities.SecurityModule;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -48,9 +49,45 @@ namespace HMS.Infrastructure.Data.DataSeed
                     PhoneNumber = "+201015390264",
                     UserName = "MuAbdelhamiid"
                 };
-
                 await _userManager.CreateAsync(adminToAdd, "P@ssw0rd");
                 await _userManager.AddToRoleAsync(adminToAdd, "Admin");
+
+                var staffListToAdd = new List<StaffUser>()
+                {
+                    new StaffUser()
+                    {
+                        FullName = "Saeed Mostafa",
+                        CreatedAt = DateTime.UtcNow,
+                        Email = "saeedmostafa@gmail.com",
+                        IsActive = true,
+                        PhoneNumber = "+2010153912364",
+                        Specialities = StaffSpecialities.HouseKeeping
+                    },
+                    new StaffUser()
+                    {
+                        FullName = "Mohamed Mohsen",
+                        CreatedAt = DateTime.UtcNow,
+                        Email = "mohamedmohsen@gmail.com",
+                        IsActive = true,
+                        PhoneNumber = "+2010153234264",
+                        Specialities = StaffSpecialities.Laundry
+                    },
+                    new StaffUser()
+                    {
+                        FullName = "Mostafa Mohsen",
+                        CreatedAt = DateTime.UtcNow,
+                        Email = "mostafamohsen@gmail.com",
+                        IsActive = true,
+                        PhoneNumber = "+201015323264",
+                        Specialities = StaffSpecialities.FoodAndBeverage
+                    }
+                };
+
+                foreach (var staff in staffListToAdd)
+                {
+                    await _userManager.CreateAsync(staff);
+                    await _userManager.AddToRoleAsync(staff, "Staff");
+                }
             }
         }
     }

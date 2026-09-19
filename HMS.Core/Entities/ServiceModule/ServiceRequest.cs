@@ -18,6 +18,8 @@ namespace HMS.Core.Entities.ServiceModule
         public string? AdminId { get; set; }
         public HotelUser? Admin { get; set; }
 
+        public int RoomNumber { get; set; }
+
         public ServiceRequestStatus Status { get; set; } = default!;
         public string? Notes { get; set; }
     }

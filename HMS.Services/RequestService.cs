@@ -6,12 +6,13 @@ using HMS.Core.Entities.Enums.ServiceModule;
 using HMS.Core.Entities.SecurityModule;
 using HMS.Core.Entities.ServiceModule;
 using HMS.Services.Abstraction;
+using HMS.Services.Helpers;
 using HMS.Shared.DTOs.ServiceModuleDTOs;
 using HMS.Shared.Messages;
+using HMS.Shared.QueryParameters.ServiceRequestModule;
 using HMS.Shared.Responses;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace HMS.Services
@@ -50,7 +51,9 @@ namespace HMS.Services
                 return GenericResponse<bool>.Error("Cannot assign staff to not pending service request.");
 
 
-            var staff = await _userManager.Users.OfType<StaffUser>().FirstOrDefaultAsync(staff => staff.Id == newAssign.StaffId);
+            var user = await _userManager.FindByIdAsync(newAssign.StaffId);
+            if (user is not StaffUser staff)
+                return GenericResponse<bool>.Error($"Staff with id: {newAssign.StaffId} was not found.", StatusCodes.Status404NotFound);
 
             if (staff is null)
                 return GenericResponse<bool>.Error($"Staff with id: {newAssign.StaffId} was not found.", StatusCodes.Status404NotFound);
@@ -58,6 +61,7 @@ namespace HMS.Services
             request.StaffId = newAssign.StaffId;
             request.AdminId = adminId;
             request.Status = ServiceRequestStatus.Assigned;
+            request.UpdatedAt = DateTime.UtcNow;
 
             try
             {
@@ -67,7 +71,7 @@ namespace HMS.Services
                 var assignNotification = new NewAssignForStaff()
                 {
                     RequestId = request.Id,
-                    RoomNumber = newAssign.RoomNumber,
+                    RoomNumber = request.RoomNumber,
                     ServiceName = request.Service.Name
                 };
                 await _notificationService.NotifyStaffAssignedAsync(staff.Id, assignNotification);
@@ -106,6 +110,9 @@ namespace HMS.Services
 
             var serviceRequestToCreate = _mapper.Map<ServiceRequest>(request);
 
+
+            serviceRequestToCreate.UserId = userId;
+
             try
             {
                 await serviceRequestRepo.AddAsync(serviceRequestToCreate);
@@ -131,11 +138,21 @@ namespace HMS.Services
             }
         }
 
-        public async Task<GenericResponse<IEnumerable<ServiceRequestDTO>>> GetAllServiceRequestsAsync()
+        public async Task<GenericResponse<IEnumerable<ServiceRequestDTO>>> GetAllServiceRequestsAsync(ServiceRequestQueryParams? requestQueryParams)
         {
             var requestRepo = _unitOfWork.GetRepository<ServiceRequest, Guid>();
 
-            var requests = await requestRepo.GetAllAsync();
+            IEnumerable<ServiceRequest> requests;
+
+            if (requestQueryParams is not null)
+            {
+                var filterExp = FilterHelper.BuildFilterExpression(requestQueryParams);
+                requests = await requestRepo.GetAllAsync(filter: filterExp, [s => s.Service, s => s.User]);
+            }
+            else
+            {
+                requests = await requestRepo.GetAllAsync(filter: null, [s => s.Service, s => s.User]);
+            }
 
             if (requests is null || !requests.Any())
                 return GenericResponse<IEnumerable<ServiceRequestDTO>>.Error("No request services found.", StatusCodes.Status404NotFound);
@@ -173,8 +190,11 @@ namespace HMS.Services
 
             var parsed = Enum.TryParse<ServiceRequestStatus>(updateRequest.Status, out var newStatus);
 
-            if (!parsed)
-                return GenericResponse<bool>.Error("Unknown status, only accepted status are: {Cancelled, Completed}.");
+            if (!parsed || (newStatus != ServiceRequestStatus.Completed &&
+                            newStatus != ServiceRequestStatus.Cancelled))
+            {
+                return GenericResponse<bool>.Error("Invalid status. Staff can only set: Completed, or Cancelled.", StatusCodes.Status400BadRequest);
+            }
 
             request.Status = newStatus;
             request.UpdatedAt = DateTime.UtcNow;
@@ -199,7 +219,6 @@ namespace HMS.Services
                 return GenericResponse<bool>.Failure("Unhandled exception happened while updating service request status.");
             }
         }
-
 
         #region Helper Method
         private bool BookingIsValid(BookingEntity booking)
