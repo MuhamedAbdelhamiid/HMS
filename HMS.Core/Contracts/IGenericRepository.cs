@@ -9,9 +9,8 @@ namespace HMS.Core.Contracts
         Task<TEntity?> GetByIdAsync(TKey id);
         Task<TEntity?> GetByIdAsync(TKey id, Expression<Func<TEntity, object>>? include);
         Task<TEntity?> GetByIdAsync(TKey id, List<Expression<Func<TEntity, object>>>? includes);
-        // will return all without filter or includes
         Task<IEnumerable<TEntity>> GetAllAsync();
-        // will return all with filters and ordering
+        Task<IEnumerable<TEntity>> GetAllAsync(Expression<Func<TEntity, bool>>? filter = null, List<Expression<Func<TEntity, object>>>? includes = null);
         Task<IEnumerable<TEntity>> GetAllAsync(
             Expression<Func<TEntity, bool>>? filter = null,
             Expression<Func<TEntity, object>>? orderBy = null,

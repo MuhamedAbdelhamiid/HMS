@@ -1,4 +1,4 @@
-﻿namespace HMS.Infrastructure.ExternalServices
+﻿namespace HMS.Infrastructure.ExternalServices.ServiceHelperEntites
 {
     public class EmailSettings
     {

@@ -70,7 +70,6 @@ namespace HMS.Services.Tests
         [Fact]
         public async Task RegisterAsync_WhenValidData_Returns200Ok()
         {
-            // Arrange
             var registerDto = new UserRegisterDTO
             {
                 FullName = "John Doe",
@@ -99,10 +98,8 @@ namespace HMS.Services.Tests
             _mockUserManager.Setup(um => um.AddToRoleAsync(userToAdd, "Guest"))
                 .ReturnsAsync(IdentityResult.Success);
 
-            // Act
             var result = await _authService.RegisterAsync(registerDto);
 
-            // Assert
             result.Should().NotBeNull();
             result.StatusCode.Should().Be(StatusCodes.Status200OK);
             result.Data.Should().NotBeNull();
@@ -112,11 +109,9 @@ namespace HMS.Services.Tests
             _mockUserManager.Verify(um => um.AddToRoleAsync(userToAdd, "Guest"), Times.Once);
         }
 
-        // Edge Scenario
         [Fact]
         public async Task RegisterAsync_WhenEmailAlreadyExists_Returns409Conflict()
         {
-            // Arrange
             var registerDto = new UserRegisterDTO
             {
                 FullName = "John Doe",
@@ -128,27 +123,21 @@ namespace HMS.Services.Tests
             _mockUserManager.Setup(um => um.FindByEmailAsync(registerDto.Email))
                 .ReturnsAsync(new HotelUser { Email = registerDto.Email });
 
-            // Act
             var result = await _authService.RegisterAsync(registerDto);
 
-            // Assert
             result.Should().NotBeNull();
             result.StatusCode.Should().Be(StatusCodes.Status409Conflict);
             result.Data.Should().BeNull();
             result.Message.Should().Be("Email already exists, please add a new one");
         }
 
-        // Edge Scenario
         [Fact]
         public async Task RegisterAsync_WhenDtoIsNull_Returns400BadRequest()
         {
-            // Arrange
             UserRegisterDTO? registerDto = null;
 
-            // Act
             var result = await _authService.RegisterAsync(registerDto!);
 
-            // Assert
             result.Should().NotBeNull();
             result.StatusCode.Should().Be(StatusCodes.Status400BadRequest);
             result.Data.Should().BeNull();
@@ -157,11 +146,9 @@ namespace HMS.Services.Tests
         #endregion
 
         #region LoginAsync Tests
-        // Happy Scenario
         [Fact]
         public async Task LoginAsync_WhenValidCredentialsAndActiveUser_Returns200OkWithToken()
         {
-            // Arrange
             var loginDto = new UserLoginDTO
             {
                 Email = "john@test.com",
@@ -182,10 +169,8 @@ namespace HMS.Services.Tests
             _mockUserManager.Setup(um => um.CheckPasswordAsync(existingUser, loginDto.Password))
                 .ReturnsAsync(true);
 
-            // Act
             var result = await _authService.LoginAsync(loginDto);
 
-            // Assert
             result.Should().NotBeNull();
             result.StatusCode.Should().Be(StatusCodes.Status200OK);
             result.Data.Should().NotBeNull();
@@ -194,11 +179,9 @@ namespace HMS.Services.Tests
             result.Message.Should().Be("User logged in successfully.");
         }
 
-        // Edge Scenario
         [Fact]
         public async Task LoginAsync_WhenUserNotFound_Returns401Unauthorized()
         {
-            // Arrange
             var loginDto = new UserLoginDTO
             {
                 Email = "missing@test.com",
@@ -208,21 +191,17 @@ namespace HMS.Services.Tests
             _mockUserManager.Setup(um => um.FindByEmailAsync(loginDto.Email))
                 .ReturnsAsync((HotelUser?)null);
 
-            // Act
             var result = await _authService.LoginAsync(loginDto);
 
-            // Assert
             result.Should().NotBeNull();
             result.StatusCode.Should().Be(StatusCodes.Status401Unauthorized);
             result.Data.Should().BeNull();
             result.Message.Should().Be("Invalid Credentials.");
         }
 
-        // Edge Scenario
         [Fact]
         public async Task LoginAsync_WhenAccountIsInactive_Returns423Locked()
         {
-            // Arrange
             var loginDto = new UserLoginDTO
             {
                 Email = "locked@test.com",
@@ -240,38 +219,30 @@ namespace HMS.Services.Tests
             _mockUserManager.Setup(um => um.FindByEmailAsync(loginDto.Email))
                 .ReturnsAsync(inactiveUser);
 
-            // Act
             var result = await _authService.LoginAsync(loginDto);
 
-            // Assert
             result.Should().NotBeNull();
             result.StatusCode.Should().Be(StatusCodes.Status423Locked);
             result.Data.Should().BeNull();
-            result.Message.Should().Be("User account are locked, Please contact with administration.");
+            result.Message.Should().Be("User account is locked. Please contact administration.");
         }
 
-        // Edge Scenario
         [Fact]
         public async Task LoginAsync_WhenDtoIsNull_Returns400BadRequest()
         {
-            // Arrange
             UserLoginDTO? loginDto = null;
 
-            // Act
             var result = await _authService.LoginAsync(loginDto!);
 
-            // Assert
             result.Should().NotBeNull();
             result.StatusCode.Should().Be(StatusCodes.Status400BadRequest);
             result.Data.Should().BeNull();
             result.Message.Should().Be("No data was sent.");
         }
 
-        // Edge Scenario
         [Fact]
         public async Task LoginAsync_WhenPasswordIsInvalid_Returns401Unauthorized()
         {
-            // Arrange
             var loginDto = new UserLoginDTO
             {
                 Email = "john@test.com",
@@ -292,10 +263,8 @@ namespace HMS.Services.Tests
             _mockUserManager.Setup(um => um.CheckPasswordAsync(existingUser, loginDto.Password))
                 .ReturnsAsync(false);
 
-            // Act
             var result = await _authService.LoginAsync(loginDto);
 
-            // Assert
             result.Should().NotBeNull();
             result.StatusCode.Should().Be(StatusCodes.Status401Unauthorized);
             result.Data.Should().BeNull();
@@ -304,11 +273,9 @@ namespace HMS.Services.Tests
         #endregion
 
         #region CreateStaffAccountAsync Tests
-        // Happy Scenario
         [Fact]
         public async Task CreateStaffAccountAsync_WhenValidData_Returns200Ok()
         {
-            // Arrange
             var staffDto = new StaffCreationDTO
             {
                 FullName = "Staff Member",
@@ -339,10 +306,8 @@ namespace HMS.Services.Tests
             _mockUserManager.Setup(um => um.AddToRoleAsync(staffToAdd, "Staff"))
                 .ReturnsAsync(IdentityResult.Success);
 
-            // Act
             var result = await _authService.CreateStaffAccountAsync(staffDto);
 
-            // Assert
             result.Should().NotBeNull();
             result.StatusCode.Should().Be(StatusCodes.Status200OK);
             result.Data.Should().BeTrue();
@@ -350,11 +315,9 @@ namespace HMS.Services.Tests
             _mockUserManager.Verify(um => um.AddToRoleAsync(staffToAdd, "Staff"), Times.Once);
         }
 
-        // Edge Scenario
         [Fact]
         public async Task CreateStaffAccountAsync_WhenSpecialtyIsInvalid_Returns400BadRequest()
         {
-            // Arrange
             var staffDto = new StaffCreationDTO
             {
                 FullName = "Staff Member",
@@ -368,21 +331,17 @@ namespace HMS.Services.Tests
             _mockUserManager.Setup(um => um.FindByEmailAsync(staffDto.Email))
                 .ReturnsAsync((HotelUser?)null);
 
-            // Act
             var result = await _authService.CreateStaffAccountAsync(staffDto);
 
-            // Assert
             result.Should().NotBeNull();
             result.StatusCode.Should().Be(StatusCodes.Status400BadRequest);
             result.Data.Should().BeFalse();
             result.Message.Should().Be("Invalid staff specialty.");
         }
 
-        // Edge Scenario
         [Fact]
         public async Task CreateStaffAccountAsync_WhenEmailAlreadyExists_Returns409Conflict()
         {
-            // Arrange
             var staffDto = new StaffCreationDTO
             {
                 FullName = "Staff Member",
@@ -395,27 +354,21 @@ namespace HMS.Services.Tests
             _mockUserManager.Setup(um => um.FindByEmailAsync(staffDto.Email))
                 .ReturnsAsync(new HotelUser { Email = staffDto.Email });
 
-            // Act
             var result = await _authService.CreateStaffAccountAsync(staffDto);
 
-            // Assert
             result.Should().NotBeNull();
             result.StatusCode.Should().Be(StatusCodes.Status409Conflict);
             result.Data.Should().BeFalse();
             result.Message.Should().Be("Email already exists, please add a new one");
         }
 
-        // Edge Scenario
         [Fact]
         public async Task CreateStaffAccountAsync_WhenDtoIsNull_Returns400BadRequest()
         {
-            // Arrange
             StaffCreationDTO? staffDto = null;
 
-            // Act
             var result = await _authService.CreateStaffAccountAsync(staffDto!);
 
-            // Assert
             result.Should().NotBeNull();
             result.StatusCode.Should().Be(StatusCodes.Status400BadRequest);
             result.Data.Should().BeFalse();
@@ -424,11 +377,9 @@ namespace HMS.Services.Tests
         #endregion
 
         #region DeactivateUserAsync / ActivateUserAsync Tests
-        // Happy Scenario
         [Fact]
         public async Task DeactivateUserAsync_WhenUserExists_Returns200Ok()
         {
-            // Arrange
             var userId = "user-1";
             var existingUser = new HotelUser
             {
@@ -443,10 +394,8 @@ namespace HMS.Services.Tests
             _mockUserManager.Setup(um => um.UpdateAsync(existingUser))
                 .ReturnsAsync(IdentityResult.Success);
 
-            // Act
             var result = await _authService.DeactivateUserAsync(userId);
 
-            // Assert
             result.Should().NotBeNull();
             result.StatusCode.Should().Be(StatusCodes.Status200OK);
             result.Data.Should().BeTrue();
@@ -454,11 +403,9 @@ namespace HMS.Services.Tests
             existingUser.IsActive.Should().BeFalse();
         }
 
-        // Happy Scenario
         [Fact]
         public async Task ActivateUserAsync_WhenUserExists_Returns200Ok()
         {
-            // Arrange
             var userId = "user-1";
             var existingUser = new HotelUser
             {
@@ -473,10 +420,8 @@ namespace HMS.Services.Tests
             _mockUserManager.Setup(um => um.UpdateAsync(existingUser))
                 .ReturnsAsync(IdentityResult.Success);
 
-            // Act
             var result = await _authService.ActivateUserAsync(userId);
 
-            // Assert
             result.Should().NotBeNull();
             result.StatusCode.Should().Be(StatusCodes.Status200OK);
             result.Data.Should().BeTrue();
@@ -484,38 +429,30 @@ namespace HMS.Services.Tests
             existingUser.IsActive.Should().BeTrue();
         }
 
-        // Edge Scenario
         [Fact]
         public async Task DeactivateUserAsync_WhenUserNotFound_Returns404NotFound()
         {
-            // Arrange
             var userId = "missing-user";
             _mockUserManager.Setup(um => um.FindByIdAsync(userId))
                 .ReturnsAsync((HotelUser?)null);
 
-            // Act
             var result = await _authService.DeactivateUserAsync(userId);
 
-            // Assert
             result.Should().NotBeNull();
             result.StatusCode.Should().Be(StatusCodes.Status404NotFound);
             result.Data.Should().BeFalse();
             result.Message.Should().Be("User was not found.");
         }
 
-        // Edge Scenario
         [Fact]
         public async Task ActivateUserAsync_WhenUserNotFound_Returns404NotFound()
         {
-            // Arrange
             var userId = "missing-user";
             _mockUserManager.Setup(um => um.FindByIdAsync(userId))
                 .ReturnsAsync((HotelUser?)null);
 
-            // Act
             var result = await _authService.ActivateUserAsync(userId);
 
-            // Assert
             result.Should().NotBeNull();
             result.StatusCode.Should().Be(StatusCodes.Status404NotFound);
             result.Data.Should().BeFalse();
@@ -527,15 +464,12 @@ namespace HMS.Services.Tests
         [Fact]
         public async Task CheckEmailExistsAsync_WhenEmailExists_Returns200OkWithDataTrue()
         {
-            // Arrange
             var email = "john@test.com";
             _mockUserManager.Setup(um => um.FindByEmailAsync(email))
                 .ReturnsAsync(new HotelUser { Email = email });
 
-            // Act
             var result = await _authService.CheckEmailExistsAsync(email);
 
-            // Assert
             result.Should().NotBeNull();
             result.StatusCode.Should().Be(StatusCodes.Status200OK);
             result.Data.Should().BeTrue();
@@ -544,15 +478,12 @@ namespace HMS.Services.Tests
         [Fact]
         public async Task CheckEmailExistsAsync_WhenEmailDoesNotExist_Returns200OkWithDataFalse()
         {
-            // Arrange
             var email = "missing@test.com";
             _mockUserManager.Setup(um => um.FindByEmailAsync(email))
                 .ReturnsAsync((HotelUser?)null);
 
-            // Act
             var result = await _authService.CheckEmailExistsAsync(email);
 
-            // Assert
             result.Should().NotBeNull();
             result.StatusCode.Should().Be(StatusCodes.Status200OK);
             result.Data.Should().BeFalse();
@@ -561,13 +492,10 @@ namespace HMS.Services.Tests
         [Fact]
         public async Task CheckEmailExistsAsync_WhenEmailIsNull_Returns400BadRequest()
         {
-            // Arrange
             string? email = null;
 
-            // Act
             var result = await _authService.CheckEmailExistsAsync(email!);
 
-            // Assert
             result.Should().NotBeNull();
             result.StatusCode.Should().Be(StatusCodes.Status400BadRequest);
             result.Data.Should().BeFalse();

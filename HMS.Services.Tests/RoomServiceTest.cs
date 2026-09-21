@@ -53,11 +53,9 @@ namespace HMS.Services.Tests
         #region Guest Services Test
 
         #region GetAllRoomsAsync 
-        // Happy Scenario
         [Fact]
         public async Task GetAllRoomsAsync_WhenRoomsExistWithoutQuery_Returns200Ok()
         {
-            //Arrange
             var fakeRooms = new List<Room>
             {
                new Room { Id = 1, Status = RoomStatus.Available, PricePerNight = 100},
@@ -77,17 +75,14 @@ namespace HMS.Services.Tests
                 It.IsAny<IEnumerable<Room>>())).Returns(fakeRoomsDTOs);
 
 
-            // Act
             var result = await _roomService.GetAllRoomsAsync(null);
 
-            // Assert
             result.Should().NotBeNull();
             result.StatusCode.Should().Be(StatusCodes.Status200OK);
             result.Data.Should().BeEquivalentTo(fakeRoomsDTOs);
             result.Data.Should().HaveCount(2);
         }
 
-        // Edge Scenario
         [Fact]
         public async Task GetAllRoomsAsync_WhenRoomsNotExist_Returns404NotFound()
         {
@@ -104,7 +99,6 @@ namespace HMS.Services.Tests
             result.Data.Should().BeNull();
         }
 
-        // Filter Scenario
         [Fact]
         public async Task GetAllRoomsAsync_WhenQueryParamsApplied_ReturnsWantedFilter()
         {
@@ -217,7 +211,7 @@ namespace HMS.Services.Tests
             var InMaintenanceRoom = new Room
             {
                 Id = 1,
-                Status = RoomStatus.Maintenance
+                Status = RoomStatus.InMaintenance
             };
             _mockRoomRepo.Setup(repo => repo.GetByIdAsync(1, It.IsAny<Expression<Func<Room, object>>>())).ReturnsAsync(InMaintenanceRoom);
 
@@ -237,7 +231,6 @@ namespace HMS.Services.Tests
 
         #region GetAllRoomsForAdmin
 
-        // Best Scenario => Get All Without Any Query Parameters
         [Fact]
         public async Task GetAllRoomsForAdminAsync_WhenRoomsExistWithoutQuery_Returns200Ok()
         {
@@ -265,7 +258,6 @@ namespace HMS.Services.Tests
 
         }
 
-        // Scenario => Get All With Query Parameters
         [Fact]
         public async Task
             GetAllRoomsForAdminAsync_WhenRoomsExistWithQuery_Returns200Ok()
@@ -299,7 +291,6 @@ namespace HMS.Services.Tests
             result.Data.Should().BeEquivalentTo(fakeRoomsDTOs);
         }
 
-        // Worst Scenario => No Rooms Exist
         [Fact]
         public async Task
             GetAllRoomsForAdminAsync_WhenRoomsNotExist_Returns404NotFound()
@@ -320,7 +311,6 @@ namespace HMS.Services.Tests
 
         #region CreateRoomAsync
 
-        // Happy Scenario => Create Room Successfully
 
         [Fact]
         public async Task
@@ -350,7 +340,6 @@ namespace HMS.Services.Tests
             result.Data.Should().Be(true);
         }
 
-        // Worst Scenario => Create Room Failed Due to Invalid Data
         [Fact]
         public async Task
             CreateRoomAsync_WhenCreationFailedDueInvalidData_Returns400BadRequest()
@@ -418,7 +407,6 @@ namespace HMS.Services.Tests
 
         #region DeleteRoomAsync
 
-        // Happy Scenario => Delete Successfully
         [Fact]
         public async Task
             DeleteRoomAsync_WhenRoomExistAndDeletedSuccessfully_Returns200Ok()
@@ -437,7 +425,6 @@ namespace HMS.Services.Tests
             result.StatusCode.Should().Be(StatusCodes.Status200OK);
         }
 
-        // Worst Scenario => Delete Failed Due to Room Not Found 
         [Fact]
         public async Task DeleteRoomAsync_WhenRoomNotExist_Returns404NotFound()
         {
@@ -447,7 +434,6 @@ namespace HMS.Services.Tests
             result.StatusCode.Should().Be(StatusCodes.Status404NotFound);
         }
 
-        // Worst Scenario => Delete Failed Due to Room Reserved 
         [Fact]
         public async Task DeleteRoomAsync_WhenRoomReserved_Returns404NotFound()
         {
@@ -470,7 +456,6 @@ namespace HMS.Services.Tests
         [Fact]
         public async Task UploadRoomImageAsync_WhenRoomExistsAndUploadSucceeds_Returns200Ok()
         {
-            // Arrange
             var room = new Room { Id = 1, Images = new List<RoomImage>() };
 
             var mockFile = new Mock<IFormFile>();
@@ -510,10 +495,8 @@ namespace HMS.Services.Tests
             _mockAttachmentService.Setup(att => att.UploadAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<IFormFile>()))
                                    .ReturnsAsync((string)null!);
 
-            // Act
             var result = await _roomService.UploadRoomImageAsync(1, filesList);
 
-            // Assert
             result.Should().NotBeNull();
             result.StatusCode.Should().Be(StatusCodes.Status500InternalServerError);
 
@@ -526,7 +509,6 @@ namespace HMS.Services.Tests
         [Fact]
         public async Task DeleteRoomImagesAsync_WhenRoomAndImageExist_Returns200Ok()
         {
-            // Arrange
             var imageId = 5;
             var roomImage = new RoomImage { Id = imageId, ImageUrl = "rooms/test.jpg" };
             var room = new Room { Id = 1, Images = new List<RoomImage> { roomImage } };
@@ -537,10 +519,8 @@ namespace HMS.Services.Tests
             _mockAttachmentService.Setup(att => att.Delete("rooms/test.jpg"))
                                    .Returns(true);
 
-            // Act
             var result = await _roomService.DeleteRoomImagesAsync(1, imageId);
 
-            // Assert
             result.Should().NotBeNull();
             result.StatusCode.Should().Be(StatusCodes.Status200OK);
             result.Data.Should().BeTrue();
@@ -550,16 +530,13 @@ namespace HMS.Services.Tests
         [Fact]
         public async Task DeleteRoomImagesAsync_WhenImageDoesNotExist_Returns400BadRequest()
         {
-            // Arrange
             var room = new Room { Id = 1, Images = new List<RoomImage>() };
 
             _mockRoomRepo.Setup(repo => repo.GetByIdAsync(1, It.IsAny<Expression<Func<Room, object>>>()))
                          .ReturnsAsync(room);
 
-            // Act
             var result = await _roomService.DeleteRoomImagesAsync(1, 99);
 
-            // Assert
             result.Should().NotBeNull();
             result.StatusCode.Should().Be(StatusCodes.Status404NotFound);
         }

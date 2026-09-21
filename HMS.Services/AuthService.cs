@@ -7,6 +7,7 @@ using HMS.Shared.Messages;
 using HMS.Shared.Responses;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
@@ -86,7 +87,7 @@ namespace HMS.Services
                 var result = await _userManager.CreateAsync(userToAdd, userRegisterDTO.Password);
 
                 if (!result.Succeeded)
-                    return GenericResponse<UserResponseDTO>.Error(string.Join(", ", result.Errors.Select(e => e.Description)), StatusCodes.Status400BadRequest);
+                    return GenericResponse<UserResponseDTO>.Error(string.Join(", ", result.Errors.Select(e => e.Description)));
 
                 await _userManager.AddToRoleAsync(userToAdd, "Guest");
                 var token = await GenerateTokenAsync(userToAdd);
@@ -122,7 +123,7 @@ namespace HMS.Services
             try
             {
                 if (staffCreationDTO is null)
-                    return GenericResponse<bool>.Error("Invalid staff data", StatusCodes.Status400BadRequest);
+                    return GenericResponse<bool>.Error("Invalid staff data");
 
                 var userWithThisEmail = await _userManager.FindByEmailAsync(staffCreationDTO.Email);
                 if (userWithThisEmail is not null)
@@ -130,7 +131,7 @@ namespace HMS.Services
 
                 var staffSpeciality = AuthServiceHelper.GetStaffSpeciality(staffCreationDTO.Specialty);
                 if (staffSpeciality is null)
-                    return GenericResponse<bool>.Error("Invalid staff specialty.", StatusCodes.Status400BadRequest);
+                    return GenericResponse<bool>.Error("Invalid staff specialty.");
 
                 var staffToAdd = _mapper.Map<StaffUser>(staffCreationDTO);
                 staffToAdd.UserName = staffCreationDTO.Email;
@@ -138,7 +139,7 @@ namespace HMS.Services
 
                 var createResult = await _userManager.CreateAsync(staffToAdd, staffCreationDTO.Password);
                 if (!createResult.Succeeded)
-                    return GenericResponse<bool>.Error(string.Join(", ", createResult.Errors.Select(e => e.Description)), StatusCodes.Status400BadRequest);
+                    return GenericResponse<bool>.Error(string.Join(", ", createResult.Errors.Select(e => e.Description)));
 
                 var roleResult = await _userManager.AddToRoleAsync(staffToAdd, "Staff");
                 if (!roleResult.Succeeded)
@@ -179,6 +180,45 @@ namespace HMS.Services
             }
         }
 
+        public async Task<GenericResponse<IEnumerable<UserInfoDTO>>> GetAllUsersAsync()
+        {
+            var users = await _userManager.Users.ToListAsync();
+
+            if (users is null || !users.Any())
+                return GenericResponse<IEnumerable<UserInfoDTO>>.Error("No users found.", StatusCodes.Status404NotFound);
+
+            var userInfoDTOs = _mapper.Map<IEnumerable<UserInfoDTO>>(users);
+
+            return GenericResponse<IEnumerable<UserInfoDTO>>.Success(userInfoDTOs, "Users retrieved successfully.");
+        }
+
+        public async Task<GenericResponse<UserInfoDTO>> GetUserInfoAsync(string userId)
+        {
+            if (string.IsNullOrWhiteSpace(userId))
+                return GenericResponse<UserInfoDTO>.Error("User id is required.", StatusCodes.Status400BadRequest);
+
+            var user = await _userManager.Users.Include(user => user.GuestBookings).FirstOrDefaultAsync(user => user.Id == userId);
+
+            if (user is null)
+                return GenericResponse<UserInfoDTO>.Error("User not found.", StatusCodes.Status404NotFound);
+
+            var userInfoDTO = _mapper.Map<UserInfoDTO>(user);
+
+            return GenericResponse<UserInfoDTO>.Success(userInfoDTO, "User information retrieved successfully.");
+        }
+
+        public async Task<GenericResponse<IEnumerable<StaffDTO>>> GetAllStaffAsync()
+        {
+            var staff = await _userManager.Users.OfType<StaffUser>().ToListAsync();
+
+            if (staff is null || !staff.Any())
+                return GenericResponse<IEnumerable<StaffDTO>>.Error("Staff not found.", StatusCodes.Status404NotFound);
+
+            var staffToShow = _mapper.Map<IEnumerable<StaffDTO>>(staff);
+
+            return GenericResponse<IEnumerable<StaffDTO>>.Success(staffToShow, "Staff retrieved successfully.");
+        }
+
         #region Helper Methods
         private async Task<GenericResponse<bool>> SetUserActiveStateAsync(string userId, bool isActive)
         {
@@ -187,7 +227,7 @@ namespace HMS.Services
             try
             {
                 if (string.IsNullOrWhiteSpace(userId))
-                    return GenericResponse<bool>.Error("User id is required.", StatusCodes.Status400BadRequest);
+                    return GenericResponse<bool>.Error("User id is required.");
 
                 var user = await _userManager.FindByIdAsync(userId);
                 if (user is null)
@@ -198,7 +238,7 @@ namespace HMS.Services
 
                 var updateResult = await _userManager.UpdateAsync(user);
                 if (!updateResult.Succeeded)
-                    return GenericResponse<bool>.Error(string.Join(", ", updateResult.Errors.Select(e => e.Description)), StatusCodes.Status400BadRequest);
+                    return GenericResponse<bool>.Error(string.Join(", ", updateResult.Errors.Select(e => e.Description)));
 
                 return GenericResponse<bool>.Success(true, isActive ? "User activated successfully." : "User deactivated successfully.");
             }
@@ -240,6 +280,9 @@ namespace HMS.Services
             var tokenHandler = new JwtSecurityTokenHandler();
             return tokenHandler.WriteToken(token);
         }
+
+
+
         #endregion
     }
 }
