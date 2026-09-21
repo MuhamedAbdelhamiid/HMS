@@ -2,6 +2,7 @@
 using HMS.Core.Entities.BookingModule;
 using HMS.Core.Entities.Enums.BookingEnums;
 using HMS.Services.Abstraction;
+using HMS.Shared.Messages;
 using HMS.Shared.Responses;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
@@ -18,17 +19,20 @@ namespace HMS.Infrastructure.ExternalServices
         private readonly IConfiguration _configuration;
         private readonly HttpClient _httpClient;
         private readonly ILogger<PaymentService> _logger;
+        private readonly IEmailService _emailService;
 
         public PaymentService(
             IUnitOfWork unitOfWork,
             IConfiguration configuration,
             HttpClient httpClient,
-            ILogger<PaymentService> logger)
+            ILogger<PaymentService> logger,
+            IEmailService emailService)
         {
             _unitOfWork = unitOfWork;
             _configuration = configuration;
             _httpClient = httpClient;
             _logger = logger;
+            _emailService = emailService;
         }
         public async Task<GenericResponse<string>> ProcessPaymentAsync(Guid bookingId)
         {
@@ -63,6 +67,15 @@ namespace HMS.Infrastructure.ExternalServices
                 booking.UpdatedAt = DateTime.UtcNow;
 
                 await _unitOfWork.SaveChangesAsync();
+
+                var emailToSent = new Email()
+                {
+                    Message = "Your booking is paid, We hope you enjoy, Thank you for choosing us.",
+                    Subject = "Booking Confirmation",
+                    To = booking.User.Email!
+                };
+
+                await _emailService.SendEmailAsync(emailToSent);
 
                 return GenericResponse<string>.Success(paymentUrl, "Payment url is ready");
             }
