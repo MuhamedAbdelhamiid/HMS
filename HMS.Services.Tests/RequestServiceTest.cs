@@ -51,20 +51,16 @@ namespace HMS.Services.Tests
         [Fact]
         public async Task AssignStaff_WhenStaffIdIsNull_Returns400BadRequest()
         {
-            // Arrange
-            var dto = new NewAssignForStaffDTO { StaffId = "" }; // Null/Empty
+            var dto = new NewAssignForStaffDTO { StaffId = "" };
 
-            // Act
             var result = await _requestService.AssignStaffForRequestAsync(Guid.NewGuid(), "admin1", dto);
 
-            // Assert
             result.StatusCode.Should().Be(StatusCodes.Status400BadRequest);
         }
 
         [Fact]
         public async Task AssignStaff_WhenRequestNotFound_Returns404NotFound()
         {
-            // Arrange
             var dto = new NewAssignForStaffDTO { StaffId = "staff1" };
             var mockRequestRepo = new Mock<IGenericRepository<ServiceRequest, Guid>>();
 
@@ -72,36 +68,30 @@ namespace HMS.Services.Tests
                            .ReturnsAsync((ServiceRequest)null!);
             _mockUnitOfWork.Setup(u => u.GetRepository<ServiceRequest, Guid>()).Returns(mockRequestRepo.Object);
 
-            // Act
             var result = await _requestService.AssignStaffForRequestAsync(Guid.NewGuid(), "admin1", dto);
 
-            // Assert
             result.StatusCode.Should().Be(StatusCodes.Status404NotFound);
         }
 
         [Fact]
         public async Task AssignStaff_WhenRequestStatusIsNotPending_Returns400BadRequest()
         {
-            // Arrange
             var dto = new NewAssignForStaffDTO { StaffId = "staff1" };
-            var request = new ServiceRequest { Status = ServiceRequestStatus.Assigned }; // مش Pending
+            var request = new ServiceRequest { Status = ServiceRequestStatus.Assigned };
             var mockRequestRepo = new Mock<IGenericRepository<ServiceRequest, Guid>>();
 
             mockRequestRepo.Setup(r => r.GetByIdAsync(It.IsAny<Guid>(), It.IsAny<List<Expression<Func<ServiceRequest, object>>>>()))
                            .ReturnsAsync(request);
             _mockUnitOfWork.Setup(u => u.GetRepository<ServiceRequest, Guid>()).Returns(mockRequestRepo.Object);
 
-            // Act
             var result = await _requestService.AssignStaffForRequestAsync(Guid.NewGuid(), "admin1", dto);
 
-            // Assert
             result.StatusCode.Should().Be(StatusCodes.Status400BadRequest);
         }
 
         [Fact]
         public async Task AssignStaff_WhenHappyPath_Returns200Ok()
         {
-            // Arrange
             var staffId = "staff123";
             var dto = new NewAssignForStaffDTO { StaffId = staffId };
             var request = new ServiceRequest
@@ -117,14 +107,11 @@ namespace HMS.Services.Tests
             _mockUnitOfWork.Setup(u => u.GetRepository<ServiceRequest, Guid>()).Returns(mockRequestRepo.Object);
             _mockUnitOfWork.Setup(u => u.SaveChangesAsync()).ReturnsAsync(1);
 
-            // هنا بنعمل Mock للـ FindByIdAsync الجديدة
             _mockUserManager.Setup(um => um.FindByIdAsync(staffId))
                             .ReturnsAsync(new StaffUser { Id = staffId, FullName = "Ahmed" });
 
-            // Act
             var result = await _requestService.AssignStaffForRequestAsync(request.Id, "admin1", dto);
 
-            // Assert
             result.StatusCode.Should().Be(StatusCodes.Status200OK);
             result.Data.Should().BeTrue();
             _mockNotificationService.Verify(n => n.NotifyStaffAssignedAsync(staffId, It.IsAny<NewAssignForStaff>()), Times.Once);
@@ -137,7 +124,6 @@ namespace HMS.Services.Tests
         [Fact]
         public async Task CreateRequest_WhenBookingNotFound_Returns404NotFound()
         {
-            // Arrange
             var dto = new CreateServiceRequestDTO { BookingId = Guid.NewGuid(), ServiceId = 1 };
             var mockBookingRepo = new Mock<IGenericRepository<BookingEntity, Guid>>();
 
@@ -145,17 +131,14 @@ namespace HMS.Services.Tests
                            .ReturnsAsync((BookingEntity)null!);
             _mockUnitOfWork.Setup(u => u.GetRepository<BookingEntity, Guid>()).Returns(mockBookingRepo.Object);
 
-            // Act
             var result = await _requestService.CreateServiceRequestAsync(dto, "user1");
 
-            // Assert
             result.StatusCode.Should().Be(StatusCodes.Status404NotFound);
         }
 
         [Fact]
         public async Task CreateRequest_WhenBookingIsNotValid_Returns402PaymentRequired()
         {
-            // Arrange
             var dto = new CreateServiceRequestDTO { BookingId = Guid.NewGuid(), ServiceId = 1 };
             var booking = new BookingEntity
             {
@@ -168,21 +151,18 @@ namespace HMS.Services.Tests
                            .ReturnsAsync(booking);
             _mockUnitOfWork.Setup(u => u.GetRepository<BookingEntity, Guid>()).Returns(mockBookingRepo.Object);
 
-            // Act
             var result = await _requestService.CreateServiceRequestAsync(dto, "user1");
 
-            // Assert
             result.StatusCode.Should().Be(StatusCodes.Status402PaymentRequired);
         }
 
         [Fact]
         public async Task CreateRequest_WhenServiceNotFound_Returns404NotFound()
         {
-            // Arrange
             var dto = new CreateServiceRequestDTO { BookingId = Guid.NewGuid(), ServiceId = 1 };
             var booking = new BookingEntity
             {
-                Status = BookingStatus.Paid, // Booking Valid
+                Status = BookingStatus.Paid,
                 CheckInDate = DateTime.UtcNow.AddDays(1),
                 CheckOutDate = DateTime.UtcNow.AddDays(2)
             };
@@ -196,17 +176,14 @@ namespace HMS.Services.Tests
             _mockUnitOfWork.Setup(u => u.GetRepository<BookingEntity, Guid>()).Returns(mockBookingRepo.Object);
             _mockUnitOfWork.Setup(u => u.GetRepository<Service, int>()).Returns(mockServiceRepo.Object);
 
-            // Act
             var result = await _requestService.CreateServiceRequestAsync(dto, "user1");
 
-            // Assert
             result.StatusCode.Should().Be(StatusCodes.Status404NotFound);
         }
 
         [Fact]
         public async Task CreateRequest_WhenHappyPath_Returns201Created()
         {
-            // Arrange
             var dto = new CreateServiceRequestDTO { BookingId = Guid.NewGuid(), ServiceId = 1 };
             var booking = new BookingEntity
             {
@@ -235,10 +212,8 @@ namespace HMS.Services.Tests
 
             _mockMapper.Setup(m => m.Map<ServiceRequest>(It.IsAny<CreateServiceRequestDTO>())).Returns(mappedRequest);
 
-            // Act
             var result = await _requestService.CreateServiceRequestAsync(dto, "user1");
 
-            // Assert
             result.StatusCode.Should().Be(StatusCodes.Status201Created);
             result.Data.Should().BeTrue();
             _mockNotificationService.Verify(n => n.NotifyAdminsNewRequestAsync(It.IsAny<NewRequestMessageForAdmin>()), Times.Once);
@@ -250,7 +225,6 @@ namespace HMS.Services.Tests
         [Fact]
         public async Task UpdateRequestStatusAsync_WhenStaffIsUnauthorized_Returns401Unauthorized()
         {
-            // Arrange
             var requestId = Guid.NewGuid();
             var authorizedStaffId = "staff123";
             var unauthorizedStaffId = "staff999";
@@ -268,7 +242,6 @@ namespace HMS.Services.Tests
 
             var result = await _requestService.UpdateRequestStatusAsync(unauthorizedStaffId, dto);
 
-            // Assert
             result.Should().NotBeNull();
             result.StatusCode.Should().Be(StatusCodes.Status401Unauthorized);
         }
@@ -276,7 +249,6 @@ namespace HMS.Services.Tests
         [Fact]
         public async Task UpdateRequestStatusAsync_WhenStatusIsInvalid_Returns400BadRequest()
         {
-            // Arrange
             var requestId = Guid.NewGuid();
             var staffId = "staff123";
             var dto = new UpdateRequestStatusDTO { RequestId = requestId, Status = "Pending" };
@@ -291,10 +263,8 @@ namespace HMS.Services.Tests
             mockRequestRepo.Setup(r => r.GetByIdAsync(requestId)).ReturnsAsync(request);
             _mockUnitOfWork.Setup(u => u.GetRepository<ServiceRequest, Guid>()).Returns(mockRequestRepo.Object);
 
-            // Act
             var result = await _requestService.UpdateRequestStatusAsync(staffId, dto);
 
-            // Assert
             result.Should().NotBeNull();
             result.StatusCode.Should().Be(StatusCodes.Status400BadRequest);
         }

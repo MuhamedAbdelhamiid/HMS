@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
 using HMS.Core.Contracts;
 using HMS.Core.Entities.BookingModule;
-using HMS.Core.Entities.Enums.BookingEnums;
 using HMS.Core.Entities.Enums.ServiceModule;
 using HMS.Core.Entities.SecurityModule;
 using HMS.Core.Entities.ServiceModule;
@@ -38,7 +37,6 @@ namespace HMS.Services
         {
             if (string.IsNullOrWhiteSpace(newAssign.StaffId))
                 return GenericResponse<bool>.Error("Staff id cannot be null");
-
 
             var requestRepo = _unitOfWork.GetRepository<ServiceRequest, Guid>();
 
@@ -100,7 +98,7 @@ namespace HMS.Services
             if (booking is null)
                 return GenericResponse<bool>.Error("Booking not found.", StatusCodes.Status404NotFound);
 
-            if (!BookingIsValid(booking))
+            if (!BookingServiceHelper.BookingIsValid(booking))
                 return GenericResponse<bool>.Error("Booking is not valid due to dates in past or not paid yet.", StatusCodes.Status402PaymentRequired);
 
             var service = await serviceRepo.GetByIdAsync(request.ServiceId);
@@ -220,9 +218,6 @@ namespace HMS.Services
             }
         }
 
-        #region Helper Method
-        private bool BookingIsValid(BookingEntity booking)
-        => booking.Status == BookingStatus.Paid && booking.CheckInDate >= DateTime.UtcNow && booking.CheckOutDate > DateTime.UtcNow;
-        #endregion
+
     }
 }

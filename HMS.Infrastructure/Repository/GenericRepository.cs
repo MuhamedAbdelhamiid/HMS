@@ -29,7 +29,6 @@ namespace HMS.Infrastructure.Repository
             Expression<Func<TEntity, object>>? orderByDesc = null
             )
         {
-            // we here hold the table
             var query = GetQueryable();
 
             if (filter is not null)

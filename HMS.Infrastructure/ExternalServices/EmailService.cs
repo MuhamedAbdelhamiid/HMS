@@ -1,4 +1,5 @@
-﻿using HMS.Services.Abstraction;
+﻿using HMS.Infrastructure.ExternalServices.ServiceHelperEntites;
+using HMS.Services.Abstraction;
 using HMS.Shared.Messages;
 using MailKit.Security;
 using Microsoft.Extensions.Options;
