@@ -1,9 +1,12 @@
 ﻿using HMS.Core.Entities.BookingModule;
 using HMS.Core.Entities.Enums.BookingEnums;
 using HMS.Core.Entities.Enums.RoomEnums;
+using HMS.Core.Entities.Enums.ServiceModule;
 using HMS.Core.Entities.RoomModule;
+using HMS.Core.Entities.ServiceModule;
 using HMS.Shared.QueryParameters.BookingModule;
 using HMS.Shared.QueryParameters.RoomModule;
+using HMS.Shared.QueryParameters.ServiceRequestModule;
 using System.Linq.Expressions;
 
 namespace HMS.Services.Helpers
@@ -33,6 +36,14 @@ namespace HMS.Services.Helpers
                 (!queryParameters.MaxPrice.HasValue || r.PricePerNight <= queryParameters.MaxPrice.Value) &&
                 (!queryParameters.MinPrice.HasValue || r.PricePerNight >= queryParameters.MinPrice.Value);
 
+        public static Expression<Func<ServiceRequest, bool>> BuildFilterExpression(
+            ServiceRequestQueryParams queryParameters)
+        {
+            var parsed = Enum.TryParse<ServiceRequestStatus>(queryParameters.Status, out var parsedLabel);
+
+            return r => (string.IsNullOrWhiteSpace(queryParameters.StaffId) || r.StaffId == queryParameters.StaffId) && (string.IsNullOrWhiteSpace(queryParameters.Status) || parsed ? r.Status == parsedLabel : true);
+        }
+
         public static Expression<Func<Room, bool>> BuildFilterExpression(
             AdminRoomQueryParameters queryParameters)
             => r =>
@@ -44,5 +55,7 @@ namespace HMS.Services.Helpers
                     r.PricePerNight <= queryParameters.MaxPrice.Value) &&
                 (!queryParameters.MinPrice.HasValue ||
                     r.PricePerNight >= queryParameters.MinPrice.Value);
+
+
     }
 }

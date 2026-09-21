@@ -247,7 +247,7 @@ namespace HMS.Services.Tests
             result.Should().NotBeNull();
             result.StatusCode.Should().Be(StatusCodes.Status423Locked);
             result.Data.Should().BeNull();
-            result.Message.Should().Be("User account are locked, Please contact with administration.");
+            result.Message.Should().Be("User account is locked. Please contact administration.");
         }
 
         // Edge Scenario

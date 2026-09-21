@@ -67,7 +67,7 @@ namespace HMS.API.Controllers
             return HandleResponse(result);
         }
 
-        [Authorize]
+        [Authorize(Roles = "Admin")]
         [HttpGet("users")]
         public async Task<ActionResult<GenericResponse<IEnumerable<UserInfoDTO>>>> GetAllUsers()
         {
@@ -80,6 +80,13 @@ namespace HMS.API.Controllers
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             var result = await _authService.GetUserInfoAsync(userId!);
+            return HandleResponse(result);
+        }
+        [Authorize(Roles = "Admin")]
+        [HttpGet("staff")]
+        public async Task<ActionResult<GenericResponse<IEnumerable<StaffDTO>>>> GetAllStaff()
+        {
+            var result = await _authService.GetAllStaffAsync();
             return HandleResponse(result);
         }
     }

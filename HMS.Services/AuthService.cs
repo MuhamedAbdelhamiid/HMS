@@ -207,6 +207,18 @@ namespace HMS.Services
             return GenericResponse<UserInfoDTO>.Success(userInfoDTO, "User information retrieved successfully.");
         }
 
+        public async Task<GenericResponse<IEnumerable<StaffDTO>>> GetAllStaffAsync()
+        {
+            var staff = await _userManager.Users.OfType<StaffUser>().ToListAsync();
+
+            if (staff is null || !staff.Any())
+                return GenericResponse<IEnumerable<StaffDTO>>.Error("Staff not found.", StatusCodes.Status404NotFound);
+
+            var staffToShow = _mapper.Map<IEnumerable<StaffDTO>>(staff);
+
+            return GenericResponse<IEnumerable<StaffDTO>>.Success(staffToShow, "Staff retrieved successfully.");
+        }
+
         #region Helper Methods
         private async Task<GenericResponse<bool>> SetUserActiveStateAsync(string userId, bool isActive)
         {
@@ -268,6 +280,8 @@ namespace HMS.Services
             var tokenHandler = new JwtSecurityTokenHandler();
             return tokenHandler.WriteToken(token);
         }
+
+
 
         #endregion
     }

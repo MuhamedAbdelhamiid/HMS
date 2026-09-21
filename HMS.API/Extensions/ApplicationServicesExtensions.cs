@@ -1,6 +1,7 @@
 ﻿using HMS.Core.Contracts;
 using HMS.Core.Entities.SecurityModule;
 using HMS.Infrastructure.Data.Context;
+using HMS.Infrastructure.Data.DataSeed;
 using HMS.Infrastructure.ExternalServices;
 using HMS.Infrastructure.Repository;
 using HMS.Services;
@@ -39,9 +40,15 @@ namespace HMS.API.Extensions
             services.AddScoped<IBookingService, BookingService>();
             services.AddHttpClient<IPaymentService, PaymentService>();
             services.AddScoped<IPaymentService, PaymentService>();
-
+            services.AddScoped<INotificationService, NotificationService>();
+            services.AddScoped<IRequestService, RequestService>();
 
             services.AddAutoMapper(typeof(RoomProfile).Assembly);
+
+            services.AddKeyedScoped<IDataInitializer, IdentityDataInitializer>("Secured");
+            services.AddKeyedScoped<IDataInitializer, DataInitializer>("Application");
+
+            services.AddSignalR();
 
             return services;
         }
@@ -69,7 +76,23 @@ namespace HMS.API.Extensions
                     IssuerSigningKey = new SymmetricSecurityKey(
                         Encoding.UTF8.GetBytes(configuration.GetSection("JWTOptions")["SecretKey"]!)),
                 };
+                opt.Events = new JwtBearerEvents
+                {
+                    OnMessageReceived = context =>
+                    {
+                        var accessToken = context.Request.Query["access_token"];
+                        var path = context.HttpContext.Request.Path;
+
+                        if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/service"))
+                        {
+                            context.Token = accessToken;
+                        }
+                        return Task.CompletedTask;
+                    }
+                };
             });
+
+
 
             return services;
         }

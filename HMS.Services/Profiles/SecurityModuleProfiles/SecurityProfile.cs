@@ -21,6 +21,9 @@ namespace HMS.Services.Profiles.SecurityModuleProfiles
 
             CreateMap<HotelUser, UserInfoDTO>();
 
+            CreateMap<StaffUser, StaffDTO>()
+                .ForMember(dest => dest.Specialities, opt => opt.MapFrom(src => src.Specialities.ToString()));
+
         }
     }
 }

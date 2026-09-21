@@ -31,5 +31,16 @@ namespace HMS.API.Extensions
 
             return app;
         }
+
+        public static async Task<WebApplication> ApplicationDataSeedAsync(this WebApplication app)
+        {
+            await using var scope = app.Services.CreateAsyncScope();
+
+            var applicationDataInitializer = scope.ServiceProvider.GetRequiredKeyedService<IDataInitializer>("Application");
+
+            await applicationDataInitializer.InitializeAsync();
+
+            return app;
+        }
     }
 }
