@@ -3,6 +3,7 @@ using HMS.Core.Entities.SecurityModule;
 using HMS.Infrastructure.Data.Context;
 using HMS.Infrastructure.Data.DataSeed;
 using HMS.Infrastructure.ExternalServices;
+using HMS.Infrastructure.ExternalServices.ServiceHelperEntites;
 using HMS.Infrastructure.Repository;
 using HMS.Services;
 using HMS.Services.Abstraction;
@@ -38,10 +39,12 @@ namespace HMS.API.Extensions
             services.AddSingleton<IEmailService, EmailService>();
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<IBookingService, BookingService>();
-            services.AddHttpClient<IPaymentService, PaymentService>();
-            services.AddScoped<IPaymentService, PaymentService>();
             services.AddScoped<INotificationService, NotificationService>();
             services.AddScoped<IRequestService, RequestService>();
+            services.AddScoped<IFeedbackService, FeedbackService>();
+
+            services.AddHttpClient<IPaymentService, PaymentService>();
+            services.AddHttpClient<IAiModerationService, AiModerationService>();
 
             services.AddAutoMapper(typeof(RoomProfile).Assembly);
 

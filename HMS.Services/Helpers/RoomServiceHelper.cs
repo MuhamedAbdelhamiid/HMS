@@ -4,7 +4,6 @@ using System.Linq.Expressions;
 
 namespace HMS.Services.Helpers
 {
-    // This class provides some helper methods across all project to use it in room service implementation and also the profile of room profile
     public static class RoomServiceHelper
     {
         public static void BuildSortExpression(

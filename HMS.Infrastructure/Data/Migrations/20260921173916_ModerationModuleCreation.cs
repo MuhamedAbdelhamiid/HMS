@@ -18,8 +18,6 @@ namespace HMS.Infrastructure.Data.Migrations
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Comment = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     IsApproved = table.Column<bool>(type: "bit", nullable: false),
-                    RejectionReason = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     BookingId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true)
@@ -33,23 +31,12 @@ namespace HMS.Infrastructure.Data.Migrations
                         principalTable: "BookingEntity",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Feedback_Users_UserId",
-                        column: x => x.UserId,
-                        principalTable: "Users",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
                 name: "IX_Feedback_BookingId",
                 table: "Feedback",
                 column: "BookingId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Feedback_UserId",
-                table: "Feedback",
-                column: "UserId");
         }
 
         /// <inheritdoc />

@@ -8,13 +8,11 @@ namespace HMS.Infrastructure.Data.Configurations.ModerationModuleConfigurations
     {
         public void Configure(EntityTypeBuilder<Feedback> builder)
         {
-            builder.HasOne(feed => feed.User)
+            builder
+                .HasOne(f => f.Booking)
                 .WithMany()
-                .HasForeignKey(feed => feed.UserId);
-
-            builder.HasOne(feed => feed.Booking)
-                .WithMany()
-                .HasForeignKey(feed => feed.BookingId);
+                .HasForeignKey(f => f.BookingId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }
