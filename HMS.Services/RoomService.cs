@@ -101,7 +101,7 @@ namespace HMS.Services
             try
             {
                 if (roomToCreate is null)
-                    return GenericResponse<bool>.Error("Invalid room data", StatusCodes.Status400BadRequest);
+                    return GenericResponse<bool>.Error("Invalid room data");
 
                 var roomRepo = _unitOfWork.GetRepository<Room, int>();
                 var roomToAdd = _mapper.Map<Room>(roomToCreate);

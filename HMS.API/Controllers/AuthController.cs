@@ -7,6 +7,7 @@ using System.Security.Claims;
 
 namespace HMS.API.Controllers
 {
+
     public class AuthController : BaseApiController
     {
         private readonly IAuthService _authService;
@@ -16,7 +17,11 @@ namespace HMS.API.Controllers
             _authService = authService;
         }
 
+
         [HttpPost("login")]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<GenericResponse<UserResponseDTO>>> Login([FromBody] UserLoginDTO userLogin)
         {
             var result = await _authService.LoginAsync(userLogin);
@@ -25,6 +30,9 @@ namespace HMS.API.Controllers
         }
 
         [HttpPost("register")]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status409Conflict)]
         public async Task<ActionResult<GenericResponse<UserResponseDTO>>> Register([FromBody] UserRegisterDTO userRegister)
         {
             var result = await _authService.RegisterAsync(userRegister);
@@ -32,8 +40,11 @@ namespace HMS.API.Controllers
             return HandleResponse(result);
         }
 
-        [Authorize(Roles = "Admin")]
         [HttpPost("create-staff")]
+        [Authorize(Roles = "Admin")]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status409Conflict)]
         public async Task<ActionResult<GenericResponse<bool>>> CreateStaff([FromBody] StaffCreationDTO staffCreationDTO)
         {
             var result = await _authService.CreateStaffAccountAsync(staffCreationDTO);
@@ -41,8 +52,11 @@ namespace HMS.API.Controllers
             return HandleResponse(result);
         }
 
-        [Authorize(Roles = "Admin")]
         [HttpPut("users/{id}/deactivate")]
+        [Authorize(Roles = "Admin")]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<GenericResponse<bool>>> Deactivate([FromRoute] string id)
         {
             var result = await _authService.DeactivateUserAsync(id);
@@ -50,8 +64,11 @@ namespace HMS.API.Controllers
             return HandleResponse(result);
         }
 
-        [Authorize(Roles = "Admin")]
         [HttpPut("users/{id}/activate")]
+        [Authorize(Roles = "Admin")]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<GenericResponse<bool>>> Activate([FromRoute] string id)
         {
             var result = await _authService.ActivateUserAsync(id);
@@ -59,31 +76,42 @@ namespace HMS.API.Controllers
             return HandleResponse(result);
         }
 
-        [Authorize]
         [HttpGet("email-exists")]
+        [Authorize]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<GenericResponse<bool>>> CheckEmail([FromQuery] string email)
         {
             var result = await _authService.CheckEmailExistsAsync(email);
             return HandleResponse(result);
         }
 
-        [Authorize(Roles = "Admin")]
         [HttpGet("users")]
+        [Authorize(Roles = "Admin")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<GenericResponse<IEnumerable<UserInfoDTO>>>> GetAllUsers()
         {
             var result = await _authService.GetAllUsersAsync();
             return HandleResponse(result);
         }
-        [Authorize]
+
         [HttpGet("profile")]
+        [Authorize]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<GenericResponse<IEnumerable<UserInfoDTO>>>> GetUser()
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             var result = await _authService.GetUserInfoAsync(userId!);
             return HandleResponse(result);
         }
-        [Authorize(Roles = "Admin")]
+
         [HttpGet("staff")]
+        [Authorize(Roles = "Admin")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<GenericResponse<IEnumerable<StaffDTO>>>> GetAllStaff()
         {
             var result = await _authService.GetAllStaffAsync();

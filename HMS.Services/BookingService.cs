@@ -63,11 +63,11 @@ namespace HMS.Services
         {
             if (bookingRequest is null)
                 return GenericResponse<Guid>.Error(
-                    "Invalid booking request.", StatusCodes.Status400BadRequest);
+                    "Invalid booking request.");
 
             if (bookingRequest.CheckInDate < DateTime.UtcNow.Date || bookingRequest.CheckOutDate < DateTime.UtcNow.Date)
                 return GenericResponse<Guid>.Error(
-                    "Dates cannot be in the past.", StatusCodes.Status400BadRequest);
+                    "Dates cannot be in the past.");
 
             var roomRepo = _unitOfWork.GetRepository<Room, int>();
             var room = await roomRepo.GetByIdAsync(bookingRequest.RoomId, r => r.Bookings);

@@ -16,8 +16,13 @@ namespace HMS.API.Controllers
             _feedbackService = feedbackService;
         }
 
-        [Authorize(Roles = "Guest")]
         [HttpPost]
+        [Authorize(Roles = "Guest")]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status402PaymentRequired)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<GenericResponse<bool>>> CreateFeedback([FromBody] CreateFeedbackDTO feedback)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -25,8 +30,12 @@ namespace HMS.API.Controllers
 
             return HandleResponse(result);
         }
-        [Authorize(Roles = "Admin")]
+
         [HttpGet]
+        [Authorize(Roles = "Admin")]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+
         public async Task<ActionResult<GenericResponse<IEnumerable<FeedbackDTO>>>> GetAllFeedbacks()
         {
             var result = await _feedbackService.GetAllFeedbacksAsync();

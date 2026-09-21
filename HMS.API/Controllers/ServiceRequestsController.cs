@@ -17,8 +17,11 @@ namespace HMS.API.Controllers
             _requestService = requestService;
         }
 
-        [Authorize(Roles = "Guest")]
         [HttpPost()]
+        [Authorize(Roles = "Guest")]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status402PaymentRequired)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<GenericResponse<bool>>> CreateServiceRequest([FromBody] CreateServiceRequestDTO requestDTO)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -27,8 +30,11 @@ namespace HMS.API.Controllers
             return HandleResponse(result);
         }
 
-        [Authorize(Roles = "Admin")]
         [HttpPut("{id}/assign")]
+        [Authorize(Roles = "Admin")]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<GenericResponse<bool>>> AssignStaffToRequest(Guid id, [FromBody] NewAssignForStaffDTO newAssign)
         {
             var adminId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -37,8 +43,11 @@ namespace HMS.API.Controllers
             return HandleResponse(result);
         }
 
-        [Authorize(Roles = "Staff")]
         [HttpPut("status")]
+        [Authorize(Roles = "Staff")]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<bool>> UpdateRequestStatus(UpdateRequestStatusDTO updateRequest)
         {
             var staffId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -48,8 +57,10 @@ namespace HMS.API.Controllers
             return HandleResponse(result);
         }
 
-        [Authorize]
         [HttpGet]
+        [Authorize]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<IEnumerable<ServiceDTO>>> GetAllServices()
         {
             var result = await _requestService.GetAvailableServicesAsync();
@@ -59,6 +70,8 @@ namespace HMS.API.Controllers
 
         [Authorize]
         [HttpGet("requests")]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<IEnumerable<ServiceRequestDTO>>> GetAllServiceRequests([FromQuery] ServiceRequestQueryParams? queryParams)
         {
             var result = await _requestService.GetAllServiceRequestsAsync(queryParams);

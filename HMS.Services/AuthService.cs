@@ -87,7 +87,7 @@ namespace HMS.Services
                 var result = await _userManager.CreateAsync(userToAdd, userRegisterDTO.Password);
 
                 if (!result.Succeeded)
-                    return GenericResponse<UserResponseDTO>.Error(string.Join(", ", result.Errors.Select(e => e.Description)), StatusCodes.Status400BadRequest);
+                    return GenericResponse<UserResponseDTO>.Error(string.Join(", ", result.Errors.Select(e => e.Description)));
 
                 await _userManager.AddToRoleAsync(userToAdd, "Guest");
                 var token = await GenerateTokenAsync(userToAdd);
@@ -123,7 +123,7 @@ namespace HMS.Services
             try
             {
                 if (staffCreationDTO is null)
-                    return GenericResponse<bool>.Error("Invalid staff data", StatusCodes.Status400BadRequest);
+                    return GenericResponse<bool>.Error("Invalid staff data");
 
                 var userWithThisEmail = await _userManager.FindByEmailAsync(staffCreationDTO.Email);
                 if (userWithThisEmail is not null)
@@ -131,7 +131,7 @@ namespace HMS.Services
 
                 var staffSpeciality = AuthServiceHelper.GetStaffSpeciality(staffCreationDTO.Specialty);
                 if (staffSpeciality is null)
-                    return GenericResponse<bool>.Error("Invalid staff specialty.", StatusCodes.Status400BadRequest);
+                    return GenericResponse<bool>.Error("Invalid staff specialty.");
 
                 var staffToAdd = _mapper.Map<StaffUser>(staffCreationDTO);
                 staffToAdd.UserName = staffCreationDTO.Email;
@@ -139,7 +139,7 @@ namespace HMS.Services
 
                 var createResult = await _userManager.CreateAsync(staffToAdd, staffCreationDTO.Password);
                 if (!createResult.Succeeded)
-                    return GenericResponse<bool>.Error(string.Join(", ", createResult.Errors.Select(e => e.Description)), StatusCodes.Status400BadRequest);
+                    return GenericResponse<bool>.Error(string.Join(", ", createResult.Errors.Select(e => e.Description)));
 
                 var roleResult = await _userManager.AddToRoleAsync(staffToAdd, "Staff");
                 if (!roleResult.Succeeded)
@@ -227,7 +227,7 @@ namespace HMS.Services
             try
             {
                 if (string.IsNullOrWhiteSpace(userId))
-                    return GenericResponse<bool>.Error("User id is required.", StatusCodes.Status400BadRequest);
+                    return GenericResponse<bool>.Error("User id is required.");
 
                 var user = await _userManager.FindByIdAsync(userId);
                 if (user is null)
@@ -238,7 +238,7 @@ namespace HMS.Services
 
                 var updateResult = await _userManager.UpdateAsync(user);
                 if (!updateResult.Succeeded)
-                    return GenericResponse<bool>.Error(string.Join(", ", updateResult.Errors.Select(e => e.Description)), StatusCodes.Status400BadRequest);
+                    return GenericResponse<bool>.Error(string.Join(", ", updateResult.Errors.Select(e => e.Description)));
 
                 return GenericResponse<bool>.Success(true, isActive ? "User activated successfully." : "User deactivated successfully.");
             }
