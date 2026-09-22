@@ -1,3 +1,4 @@
+using HMS.API.Attributes;
 using HMS.Services.Abstraction;
 using HMS.Shared.DTOs.RoomModuleDTOs;
 using HMS.Shared.QueryParameters.RoomModule;
@@ -15,6 +16,7 @@ namespace HMS.API.Controllers
             => _roomService = roomService;
 
         #region Guest Endpoints
+        [Cache(3)]
         [HttpGet("public")]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status200OK)]
