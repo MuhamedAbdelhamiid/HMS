@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using StackExchange.Redis;
 using System.Text;
 
 namespace HMS.API.Extensions
@@ -26,7 +27,14 @@ namespace HMS.API.Extensions
                 opt.UseSqlServer(configuration.GetConnectionString("DefaultConnection"));
             });
 
+            services.AddSingleton<IConnectionMultiplexer>(opt =>
+            {
+                return ConnectionMultiplexer.Connect(configuration.GetConnectionString("RadisConnection")!);
+            });
+
             services.AddScoped<IUnitOfWork, UnitOfWork>();
+            services.AddScoped<ICacheRepository, CacheRepository>();
+
             services.Configure<EmailSettings>(configuration.GetSection("EmailSettings"));
 
             return services;
@@ -43,6 +51,8 @@ namespace HMS.API.Extensions
             services.AddScoped<INotificationService, NotificationService>();
             services.AddScoped<IRequestService, RequestService>();
             services.AddScoped<IFeedbackService, FeedbackService>();
+            services.AddScoped<ICacheService, CacheService>();
+
 
             services.AddHttpClient<IPaymentService, PaymentService>();
             services.AddHttpClient<IAiModerationService, AiModerationService>();

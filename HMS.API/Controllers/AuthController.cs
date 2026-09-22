@@ -1,4 +1,5 @@
-﻿using HMS.Services.Abstraction;
+﻿using HMS.API.Attributes;
+using HMS.Services.Abstraction;
 using HMS.Shared.DTOs.SecurityModuleDTOs;
 using HMS.Shared.Responses;
 using Microsoft.AspNetCore.Authorization;
@@ -87,6 +88,7 @@ namespace HMS.API.Controllers
             return HandleResponse(result);
         }
 
+        [Cache(5)]
         [HttpGet("users")]
         [Authorize(Roles = "Admin")]
         [ProducesResponseType(StatusCodes.Status200OK)]
