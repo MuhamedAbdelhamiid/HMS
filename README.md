@@ -18,6 +18,6 @@
 - **Database:** SQL Server, Entity Framework Core 8
 - **Real-time:** SignalR
 - **External APIs:** OpenAI API, Paymob Payment Gateway
-- **Architecture & Patterns:** Clean Architecture, CQRS-like separation, Repository Pattern, Unit of Work
+- **Architecture & Patterns:** Clean Architecture, Repository Pattern, Unit of Work
 - **Testing:** xUnit, Moq, FluentAssertions
 - **Tools:** Swagger, AutoMapper, MailKit
